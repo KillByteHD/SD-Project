@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="java">
+    <CLASSES />
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/Downloads/caprica-vlcj-vlcj-4.2.0-6-gb017c28.zip!/caprica-vlcj-b017c28/src/main/java" />
+      <root url="jar://$USER_HOME$/Downloads/caprica-vlcj-vlcj-4.2.0-6-gb017c28.zip!/caprica-vlcj-b017c28/src/test/java" />
+    </SOURCES>
+  </library>
+</component>
