@@ -37,8 +37,6 @@ public class ServerThread implements Runnable
 
     public void run()
     {
-
-
         while(!this.socket.isClosed())
         {
             Request request = null;
@@ -53,6 +51,7 @@ public class ServerThread implements Runnable
             catch (ProtocolParseError | IOException e) { break; }
 
             //TODO: WTF IS THIS SHIT? PLS FIX ... FAGGOT
+
             if(request instanceof C2DRequest.Login)
             {
                 C2DRequest.Login tmp = (C2DRequest.Login) request;
@@ -67,6 +66,7 @@ public class ServerThread implements Runnable
                 }
                 finally
                 {
+
                     this.pw.println(reply.write());
                     Logger.sended(reply.write());
                 }
