@@ -2,15 +2,16 @@ package Server;
 
 import Common.Model.Data;
 import Common.Protocol.Request;
+import Server.Utils.Tuple;
 
 public class Worker extends Thread
 {
-    private BoundedBuffer<Request> bb;
+    private BoundedBuffer<Tuple<ConnectionMutex, Request>> bb;
     private Data data;
 
     private boolean isAlive = true;
 
-    public Worker(BoundedBuffer<Request> bb, Data data)
+    public Worker(BoundedBuffer<Tuple<ConnectionMutex, Request>> bb, Data data)
     {
         this.bb = bb;
         this.data = data;
@@ -22,7 +23,7 @@ public class Worker extends Thread
     {
         while(this.isAlive)
         {
-            Request r = bb.get();
+            Request r = bb.get().getSnd();
             // Continue
         }
     }

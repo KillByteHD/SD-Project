@@ -10,6 +10,11 @@ public class ServerInit
     {
         ServerSocket ss = new ServerSocket(1111);
         Logger.started();
+
+        //BoundedBuffer<Tuple<ConnectionMutex, Request>> buffer = new BoundedBuffer<>(5);
+        //Receiver rc = new Receiver(buffer);
+        //
+        //WorkerPool pool = new WorkerPool(buffer,data)
         Data data = new ServerData();
 
         while(true)

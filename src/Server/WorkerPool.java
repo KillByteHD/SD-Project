@@ -2,6 +2,7 @@ package Server;
 
 import Common.Model.Data;
 import Common.Protocol.Request;
+import Server.Utils.Tuple;
 
 import java.net.ServerSocket;
 
@@ -13,15 +14,13 @@ public class WorkerPool
 
     // Varibles
     private Thread[] ts;
-    private BoundedBuffer<Request> buffer;
-    private ServerSocket serverSocket;
+    private BoundedBuffer<Tuple<ConnectionMutex, Request>> buffer;
     private Data data;
 
-    public WorkerPool(ServerSocket serverSocket, Data data)
+    public WorkerPool(Data data, BoundedBuffer<Tuple<ConnectionMutex, Request>> bb)
     {
         this.ts = new Thread[WORKERS];
-        this.buffer = new BoundedBuffer<>(BUFFER_SIZE);
-        this.serverSocket = serverSocket;
+        this.buffer = bb;//new BoundedBuffer<>(BUFFER_SIZE);
         this.data = data;
     }
 
