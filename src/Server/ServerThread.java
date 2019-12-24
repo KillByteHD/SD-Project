@@ -1,5 +1,6 @@
 package Server;
 
+import Common.Exceptions.ExceptionCode;
 import Common.Exceptions.InvalidLogin;
 import Common.Exceptions.ProtocolParseError;
 import Common.Model.Data;
@@ -12,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.ConnectException;
 import java.net.Socket;
 
 public class ServerThread implements Runnable
@@ -30,7 +32,7 @@ public class ServerThread implements Runnable
             this.br = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
             this.pw = new PrintWriter(this.socket.getOutputStream(),true);
             this.data = data;
-            Logger.connected(this.socket.getInetAddress().getHostAddress());
+            Logger.connected(this.socket);
         }
         catch(IOException e) { }
     }
@@ -45,8 +47,8 @@ public class ServerThread implements Runnable
             try
             {
                 String in = this.br.readLine();
-                Logger.received(this.socket.getInetAddress().getHostAddress(), in);
-                request = Request.parse(in);
+                Logger.received(this.socket, in);
+                request = C2DRequest.parse(in);
             }
             catch (ProtocolParseError | IOException e) { break; }
 
@@ -60,23 +62,28 @@ public class ServerThread implements Runnable
                     this.data.login(tmp.getUsername(),tmp.getPassword());
                     reply = new C2DReply.Login();
                 }
-                catch (InvalidLogin e)
+                catch (InvalidLogin ile)
                 {
-                    reply = new C2DReply.Login(e.getCode());
+                    reply = new C2DReply.Login(ile.getCode());
+                }
+                catch (ConnectException ce)
+                {
+                    reply = new C2DReply.Login(ExceptionCode.ServerError);
                 }
                 finally
                 {
 
                     this.pw.println(reply.write());
-                    Logger.sended(reply.write());
+                    Logger.sended(this.socket,reply.write());
                 }
             }
         }
 
         try
         {
+            // Closing socket also closes Input/Output Stream
             this.socket.close();
-            Logger.disconnected(this.socket.getInetAddress().getHostAddress());
+            Logger.disconnected(this.socket);
         }
         catch (IOException e)
         { e.printStackTrace(); }

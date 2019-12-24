@@ -1,22 +1,34 @@
 package Client;
 
-import Common.Exceptions.InvalidLogin;
 import Common.Model.Data;
+
+import java.net.ConnectException;
 
 public class ClientInit
 {
+    private static final int CONNECT_DELAY = 3;
+
     public static void main(String[] args)
     {
-        Data data = new ClientData();
+        View view = new View();
 
-        try
+        Data data = null;
+        while(true)
         {
-            data.login("root","root");
-            System.out.println("Login Successfull");
+            try
+            {
+                data = new ClientData();
+                break;
+            }
+            catch (ConnectException e)
+            {
+                System.out.println("Unable to connect to server ... Retrying in " + CONNECT_DELAY + " secs ...");
+                try { Thread.sleep(CONNECT_DELAY * 1000); }
+                catch (InterruptedException ignored) { }
+            }
         }
-        catch (InvalidLogin e)
-        {
-            System.err.println(e.getCode());
-        }
+
+        CommandHandler cp = new CommandHandler(view,data);
+        cp.handler();
     }
 }

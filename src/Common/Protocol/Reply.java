@@ -7,7 +7,7 @@ public interface Reply
 {
     String write();
 
-    static Reply parse(String str) throws ProtocolParseError
+    /*static Reply parse(String str) throws ProtocolParseError
     {
         try
         {
@@ -23,5 +23,5 @@ public interface Reply
         catch (Exception e) { }
 
         throw new ProtocolParseError("Protocol Parse Error");
-    }
+    }*/
 }

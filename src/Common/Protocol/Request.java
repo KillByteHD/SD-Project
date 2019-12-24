@@ -6,7 +6,7 @@ public interface Request
 {
     String write();
 
-    static Request parse(String str) throws ProtocolParseError
+    /*static Request parse(String str) throws ProtocolParseError
     {
         try
         {
@@ -20,6 +20,6 @@ public interface Request
         }
         catch (Exception e) { }
         throw new ProtocolParseError("Protocol Parse Error");
-    }
+    }*/
 }
 

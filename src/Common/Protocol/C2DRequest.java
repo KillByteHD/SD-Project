@@ -4,7 +4,6 @@ import Common.Exceptions.ProtocolParseError;
 
 public class C2DRequest
 {
-    //TODO: FAKHSDFKASHDBF O NOME TA IGUAL AO REPLY CARALHO ... AQUI NAO HA NAMESPACES HO MONGA DE MERDA
     public static class Login implements Request
     {
         private String username;
@@ -30,6 +29,22 @@ public class C2DRequest
         {
             return "login:" + username + ":" + password;
         }
+    }
+
+    public static Request parse(String str) throws ProtocolParseError
+    {
+        try
+        {
+            String[] args = str.split(":");
+
+            switch (args[0])
+            {
+                case "login":
+                    return new C2DRequest.Login(args[1],args[2]);
+            }
+        }
+        catch (Exception e) { }
+        throw new ProtocolParseError("Protocol Parse Error");
     }
 }
 

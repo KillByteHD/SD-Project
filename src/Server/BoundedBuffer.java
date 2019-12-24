@@ -54,7 +54,6 @@ public class BoundedBuffer<T>
 
         this.isFull.signal();
 
-
         @SuppressWarnings("unchecked")
         T tmp = (T) this.values[--this.pos_write];
 
