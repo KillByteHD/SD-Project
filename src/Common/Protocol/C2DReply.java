@@ -9,10 +9,12 @@ public class C2DReply
     public static class Login implements Reply
     {
         private ExceptionCode status;
+        private String auth;
 
-        public Login()
+        public Login(String auth)
         {
             this.status = null;
+            this.auth = auth;
         }
 
         public Login(ExceptionCode code)
@@ -22,12 +24,16 @@ public class C2DReply
 
         public ExceptionCode getStatus()
         {
-            return status;
+            return this.status;
+        }
+        public String getAuth()
+        {
+            return this.auth;
         }
 
         public String write()
         {
-            return (this.status == null) ? "ok" : "err:"+status.ordinal();
+            return (this.status == null) ? "ok:"+this.auth : "err:"+status.ordinal();
         }
     }
 
@@ -41,7 +47,7 @@ public class C2DReply
                 case "err":
                     return new C2DReply.Login(ExceptionCode.values()[Integer.parseInt(args[1])]);
                 case "ok":
-                    return new C2DReply.Login();
+                    return new C2DReply.Login(args[1]);
             }
         }
         catch (Exception e) { }

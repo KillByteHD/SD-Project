@@ -36,6 +36,12 @@ public class User
     }
 
 
+    public String authID()
+    {
+        return Utils.sha256String(this.username + this.password_hash);
+    }
+
+
     @Override
     public boolean equals(Object o)
     {

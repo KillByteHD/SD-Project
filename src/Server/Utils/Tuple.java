@@ -20,11 +20,11 @@ public class Tuple<A,B>
         this.snd = snd;
     }
 
-    public A getFst()
+    public A fst()
     {
         return this.fst;
     }
-    public B getSnd()
+    public B snd()
     {
         return this.snd;
     }

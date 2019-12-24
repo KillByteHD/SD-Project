@@ -18,18 +18,38 @@ public class ConnectionMutex
         {
             this.socket = socket;
             this.br = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
-            this.pw = new PrintWriter(this.socket.getOutputStream(),true);
+            this.pw = new PrintWriter(this.socket.getOutputStream());
+            this.pw.flush();
         }
         catch(IOException e) { }
     }
 
-    public BufferedReader getBufferedReader()
+
+    public Socket getSocket()
     {
-        return br;
+        return socket;
     }
 
-    public PrintWriter getPrintWriter()
+    public boolean isClosed()
     {
-        return pw;
+        return this.socket.isClosed();
+    }
+
+    public void close() throws IOException
+    {
+        this.socket.close();
+    }
+
+
+    public synchronized void println(String str)
+    {
+        this.pw.println(str);
+        this.pw.flush();
+    }
+
+    //TODO: Quando o cliente for multithreaded acrescentar o syncronized aqui
+    public /*synchronized*/ String readln() throws IOException
+    {
+        return this.br.readLine();
     }
 }

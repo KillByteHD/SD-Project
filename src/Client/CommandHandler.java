@@ -11,11 +11,13 @@ public class CommandHandler
 {
     private View view;
     private Data data;
+    private String auth;
 
     public CommandHandler(View v, Data d)
     {
         this.view = v;
         this.data = d;
+        this.auth = null;
     }
 
 
@@ -64,7 +66,7 @@ public class CommandHandler
 
         try
         {
-            this.data.login(username,password);
+            this.auth = this.data.login(username,password);
             this.view.println(" - Login Successfull - ");
         }
         catch (InvalidLogin il)

@@ -4,8 +4,6 @@ import Common.Model.Data;
 import Common.Protocol.Request;
 import Server.Utils.Tuple;
 
-import java.net.ServerSocket;
-
 public class WorkerPool
 {
     // Constants
@@ -20,7 +18,7 @@ public class WorkerPool
     public WorkerPool(Data data, BoundedBuffer<Tuple<ConnectionMutex, Request>> bb)
     {
         this.ts = new Thread[WORKERS];
-        this.buffer = bb;//new BoundedBuffer<>(BUFFER_SIZE);
+        this.buffer = bb;
         this.data = data;
     }
 

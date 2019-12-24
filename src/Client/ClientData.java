@@ -43,7 +43,7 @@ public class ClientData implements Data
     }
 
     @Override
-    public void login(String username, String password) throws InvalidLogin, ConnectException
+    public String login(String username, String password) throws InvalidLogin, ConnectException
     {
         try
         {
@@ -57,6 +57,8 @@ public class ClientData implements Data
 
             if(reply.getStatus() == ExceptionCode.InvalidLogin)
                 throw new InvalidLogin();
+
+            return reply.getAuth();
         }
         catch (IOException | ProtocolParseError e)
         {

@@ -28,21 +28,18 @@ public class ServerData implements Data
 
 
     @Override
-    public void login(String username, String password) throws InvalidLogin
+    public String login(String username, String password) throws InvalidLogin
     {
         User u;
         try
-        {
-            u = this.users.get(username);
-        }
-        catch (Exception e)
-        {
-            throw new InvalidLogin();
-        }
+        { u = this.users.get(username); }
+        catch (Exception e) //TODO: Mudar para as respetivas excecoes (exception apanha tudo - e nao queremos isso)
+        { throw new InvalidLogin(); }
 
         if(u == null || !u.checkPassword(password))
             throw new InvalidLogin();
 
+        return u.authID();
     }
 
     @Override
