@@ -1,6 +1,7 @@
 package Client;
 
 import Common.Exceptions.InvalidLogin;
+import Common.Exceptions.UserAlreadyExists;
 import Common.Model.Data;
 
 import java.lang.reflect.Method;
@@ -39,6 +40,12 @@ public class CommandHandler
                     case "login":
                         login();
                         break;
+                    case "logout":
+                        logout();
+                        break;
+                    case "register":
+                        register(/*args*/);
+                        break;
                     case "help":
                         help(args);
                         break;
@@ -75,12 +82,47 @@ public class CommandHandler
         }
     }
 
+    @Command(name = "logout", description = "Logout Process")
+    public void logout()
+    {
+        if(this.auth != null)
+        {
+            this.view.println(" - Logout Successful -");
+            this.auth = null;
+        }
+        else
+            this.view.println(" - Unable to Logout - ");
+    }
+
+    @Command(name = "register", description = "Register a new User"/*, args = {"username" , "password", "confirm_password"}*/)
+    public void register(/*String[] args*/) throws ConnectException
+    {
+        String username = this.view.get_field("Username");
+        String password = this.view.get_field("Password");
+        String password_confirmation = this.view.get_field("Confirm Password");
+
+        if(!password.equals(password_confirmation))
+            this.view.error("Passwords do not match");
+        else
+        {
+            try
+            {
+                this.data.register(username,password);
+                this.view.println(" - User created - ");
+            }
+            catch (UserAlreadyExists userAlreadyExists)
+            {
+                this.view.error("User already exists");
+            }
+        }
+    }
+
 
     @Command(name = "help", description = "Help Command", args = {"command"})
-    public void help(String[] in)
+    public void help(String[] args)
     {
         String command = null;
-        try { command = in[1]; }
+        try { command = args[1]; }
         catch (Exception e) { }
 
         if(command == null)
@@ -95,10 +137,10 @@ public class CommandHandler
                     if(i != 0)
                         help.append('\n');
                     i++;
-                    String[] args = c.args();
+                    String[] cmd_agrs = c.args();
 
                     help.append(" ").append(c.name());
-                    for(String argi : args)
+                    for(String argi : cmd_agrs)
                         help.append(" [").append(argi).append("]");
                     help.append(" - ").append(c.description());
                 }
@@ -119,10 +161,10 @@ public class CommandHandler
                     help.append(" Description: ").append(c.description()).append('\n');
                     help.append(" Usage: \n");
 
-                    String[] args = c.args();
+                    String[] cmd_args = c.args();
 
                     help.append(" \t").append(c.name());
-                    for(String argi : args)
+                    for(String argi : cmd_args)
                         help.append(" [").append(argi).append("]");
 
                     this.view.help_block(help.toString());

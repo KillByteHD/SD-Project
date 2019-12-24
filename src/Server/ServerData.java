@@ -1,5 +1,6 @@
 package Server;
 
+import Common.Exceptions.UserAlreadyExists;
 import Common.Model.Data;
 import Common.Model.Music;
 import Common.Model.User;
@@ -7,6 +8,7 @@ import Common.Exceptions.InvalidLogin;
 import Common.Model.Utils;
 
 import java.io.File;
+import java.net.ConnectException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -33,13 +35,28 @@ public class ServerData implements Data
         User u;
         try
         { u = this.users.get(username); }
-        catch (Exception e) //TODO: Mudar para as respetivas excecoes (exception apanha tudo - e nao queremos isso)
+        catch (NullPointerException | ClassCastException e)
         { throw new InvalidLogin(); }
 
         if(u == null || !u.checkPassword(password))
             throw new InvalidLogin();
 
         return u.authID();
+    }
+
+    public void register(String username, String password) throws UserAlreadyExists
+    {
+        try
+        {
+            User u = this.users.get(username);
+
+            if(u == null)
+                this.users.put(username,new User(username,password));
+            else
+                throw new UserAlreadyExists();
+        }
+        catch(NullPointerException | ClassCastException cce)
+        { }
     }
 
     @Override

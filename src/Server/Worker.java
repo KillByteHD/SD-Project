@@ -2,6 +2,7 @@ package Server;
 
 import Common.Exceptions.ExceptionCode;
 import Common.Exceptions.InvalidLogin;
+import Common.Exceptions.UserAlreadyExists;
 import Common.Model.Data;
 import Common.Protocol.C2DReply;
 import Common.Protocol.C2DRequest;
@@ -52,6 +53,29 @@ public class Worker extends Thread
                 {
                     // Nao seria possivel acontecer nesta implementacao
                     reply = new C2DReply.Login(ExceptionCode.ServerError);
+                }
+                finally
+                {
+                    cm.println(reply.write());
+                    Logger.sended(cm.getSocket(),reply.write());
+                }
+            }
+            else if(request instanceof C2DRequest.Register)
+            {
+                C2DRequest.Register tmp = (C2DRequest.Register) request;
+                try
+                {
+                    this.data.register(tmp.getUsername(),tmp.getPassword());
+                    reply = new C2DReply.Register();
+                }
+                catch (UserAlreadyExists uae)
+                {
+                    reply = new C2DReply.Register(uae.getCode());
+                }
+                catch (ConnectException ce)
+                {
+                    // Nao seria possivel acontecer nesta implementacao
+                    reply = new C2DReply.Register(ExceptionCode.ServerError);
                 }
                 finally
                 {

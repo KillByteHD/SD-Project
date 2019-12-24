@@ -4,5 +4,6 @@ public enum ExceptionCode
 {
     ServerError,
     ProtocolParseError,
-    InvalidLogin
+    InvalidLogin,
+    UserAlreadyExists
 }

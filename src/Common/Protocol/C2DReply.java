@@ -22,6 +22,7 @@ public class C2DReply
             this.status = code;
         }
 
+
         public ExceptionCode getStatus()
         {
             return this.status;
@@ -33,7 +34,29 @@ public class C2DReply
 
         public String write()
         {
-            return (this.status == null) ? "ok:"+this.auth : "err:"+status.ordinal();
+            return (this.status == null) ? "logged:"+this.auth : "err:"+status.ordinal();
+        }
+    }
+
+    public static class Register implements Reply
+    {
+        private ExceptionCode status;
+
+        public Register()
+        {
+            this.status = null;
+        }
+
+        public Register(ExceptionCode code)
+        {
+            this.status = code;
+        }
+
+
+        @Override
+        public String write()
+        {
+            return (this.status == null) ? "registered" : "err:"+status.ordinal();
         }
     }
 
@@ -46,8 +69,11 @@ public class C2DReply
             {
                 case "err":
                     return new C2DReply.Login(ExceptionCode.values()[Integer.parseInt(args[1])]);
-                case "ok":
+                case "logged":
                     return new C2DReply.Login(args[1]);
+                case "registered":
+                    return new C2DReply.Register();
+
             }
         }
         catch (Exception e) { }

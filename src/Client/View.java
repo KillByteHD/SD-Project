@@ -39,7 +39,7 @@ public class View
 
     public String get_field(String field)
     {
-        System.out.print(field + ": ");
+        System.out.print(field + " > ");
         return this.sc.nextLine();
     }
 

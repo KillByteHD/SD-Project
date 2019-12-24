@@ -1,12 +1,9 @@
 package Client;
 
-import Common.Exceptions.ExceptionCode;
-import Common.Exceptions.ProtocolParseError;
-import Common.Exceptions.ServerError;
+import Common.Exceptions.*;
 import Common.Protocol.C2DReply;
 import Common.Protocol.C2DRequest;
 import Common.Model.Data;
-import Common.Exceptions.InvalidLogin;
 import Common.Protocol.Reply;
 import Common.Protocol.Request;
 
@@ -59,6 +56,35 @@ public class ClientData implements Data
                 throw new InvalidLogin();
 
             return reply.getAuth();
+        }
+        catch (IOException | ProtocolParseError e)
+        {
+            throw new ConnectException();
+        }
+    }
+
+    public void register(String username, String password) throws UserAlreadyExists, ConnectException
+    {
+        try
+        {
+            Request request = new C2DRequest.Register(username,password);
+            this.pw.println(request.write());
+
+            String in = this.br.readLine();
+            if(in == null)
+                throw new ConnectException();
+
+            try
+            {
+                C2DReply.Register reply = (C2DReply.Register) C2DReply.parse(in);
+            }
+            catch (ClassCastException cce)
+            {
+                C2DReply.Login reply = (C2DReply.Login) C2DReply.parse(in);
+
+                if(reply.getStatus() == ExceptionCode.UserAlreadyExists)
+                    throw new UserAlreadyExists();
+            }
         }
         catch (IOException | ProtocolParseError e)
         {
