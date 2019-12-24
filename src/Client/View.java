@@ -12,6 +12,12 @@ public class View
     }
 
 
+    public void welcome()
+    {
+        System.out.println(" - Welcome - Enter 'help' to list all commands - ");
+    }
+
+
     public String readLine()
     {
         System.out.print("> ");
@@ -46,5 +52,12 @@ public class View
     public void invalid_arguments()
     {
         System.out.println(" - Invalid Arguments - ");
+    }
+
+    public void help_block(String help)
+    {
+        System.out.println(" ========== [ HELP ] ========== ");
+        System.out.println(help);
+        System.out.println(" ============================== ");
     }
 }

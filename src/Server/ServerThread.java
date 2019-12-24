@@ -16,7 +16,7 @@ import java.io.PrintWriter;
 import java.net.ConnectException;
 import java.net.Socket;
 
-public class ServerThread implements Runnable
+public class ServerThread extends Thread
 {
     private Socket socket;
     private BufferedReader br;

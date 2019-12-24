@@ -1,6 +1,8 @@
 package Client;
 
+import Common.Exceptions.ExceptionCode;
 import Common.Exceptions.ProtocolParseError;
+import Common.Exceptions.ServerError;
 import Common.Protocol.C2DReply;
 import Common.Protocol.C2DRequest;
 import Common.Model.Data;
@@ -14,21 +16,29 @@ import java.net.Socket;
 
 public class ClientData implements Data
 {
+    private final int CONNECT_DELAY = 3;
+
     private Socket socket;
     private BufferedReader br;
     private PrintWriter pw;
 
-    public ClientData() throws ConnectException
+    public ClientData()
     {
-        try
+        while(true)
         {
-            this.socket = new Socket("localhost",1111);
-            this.br = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
-            this.pw = new PrintWriter(this.socket.getOutputStream(),true);
-        }
-        catch (IOException e)
-        {
-            throw new ConnectException();
+            try
+            {
+                this.socket = new Socket("localhost",1111);
+                this.br = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
+                this.pw = new PrintWriter(this.socket.getOutputStream(),true);
+                break;
+            }
+            catch (IOException e)
+            {
+                System.out.println("Unable to connect to server ... Retrying in " + CONNECT_DELAY + " secs ...");
+                try { Thread.sleep(CONNECT_DELAY * 1000); }
+                catch (InterruptedException ignored) { }
+            }
         }
     }
 
@@ -39,22 +49,18 @@ public class ClientData implements Data
         {
             Request request = new C2DRequest.Login(username,password);
             this.pw.println(request.write());
-            System.out.println("OK1");
 
-            String asd = this.br.readLine();
-            Reply reply = C2DReply.parse(asd);
-            System.out.println("OK2");
-            System.out.println(reply.write());
-            System.out.println("OK3");
+            String in = this.br.readLine();
+            if(in == null)
+                throw new ConnectException();
+            C2DReply.Login reply = (C2DReply.Login) C2DReply.parse(in);
 
+            if(reply.getStatus() == ExceptionCode.InvalidLogin)
+                throw new InvalidLogin();
         }
-        catch (IOException ioe)
+        catch (IOException | ProtocolParseError e)
         {
             throw new ConnectException();
-        }
-        catch (ProtocolParseError ppe)
-        {
-            throw new InvalidLogin();
         }
     }
 

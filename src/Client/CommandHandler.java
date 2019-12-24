@@ -5,7 +5,6 @@ import Common.Model.Data;
 
 import java.lang.reflect.Method;
 import java.net.ConnectException;
-import java.net.CookiePolicy;
 import java.util.Scanner;
 
 public class CommandHandler
@@ -23,6 +22,7 @@ public class CommandHandler
     public void handler()
     {
         Scanner s = new Scanner(System.in);
+        this.view.welcome();
 
         String in;
         while(true)
@@ -38,17 +38,20 @@ public class CommandHandler
                         login();
                         break;
                     case "help":
-                        help();
+                        help(args);
                         break;
                     case "exit":
                         exit();
+                        break;
+                    default:
+                        this.view.unknown_command();
                         break;
                 }
             }
             catch (ConnectException ce)
             {
                 this.view.error("Unable to connect to server");
-                System.out.println("NOT OK");
+                this.data = new ClientData();
             }
         }
     }
@@ -62,39 +65,73 @@ public class CommandHandler
         try
         {
             this.data.login(username,password);
+            this.view.println(" - Login Successfull - ");
         }
         catch (InvalidLogin il)
         {
             this.view.error("Invalid Login / Please try again");
         }
-
-        this.view.println(" - Login Successfull - ");
     }
 
-    @Command(name = "help", description = "Help Command")
-    public void help()
-    {
-        System.out.println(" ========== [ HELP ] ========== ");
-        for(Method m : CommandHandler.class.getMethods())
-        {
-            Command c = m.getAnnotation(Command.class);
-            if(c != null)
-            {
-                String[] args = c.args();
 
-                if(args.length == 0)
-                    System.out.println(" # " + c.name() + " - " + c.description());
-                else
+    @Command(name = "help", description = "Help Command", args = {"command"})
+    public void help(String[] in)
+    {
+        String command = null;
+        try { command = in[1]; }
+        catch (Exception e) { }
+
+        if(command == null)
+        {
+            StringBuilder help = new StringBuilder();
+            int i = 0;
+            for(Method m : CommandHandler.class.getMethods())
+            {
+                Command c = m.getAnnotation(Command.class);
+                if(c != null)
                 {
-                    String tmp = " # " + c.name();
+                    if(i != 0)
+                        help.append('\n');
+                    i++;
+                    String[] args = c.args();
+
+                    help.append(" ").append(c.name());
                     for(String argi : args)
-                        tmp += " [" + argi + "]";
-                    System.out.println(tmp + " - " + c.description());
+                        help.append(" [").append(argi).append("]");
+                    help.append(" - ").append(c.description());
                 }
             }
+
+            this.view.help_block(help.toString());
         }
-        System.out.println(" ============================== ");
+        else
+        {
+            try
+            {
+                Method m = CommandHandler.class.getMethod(command);
+                StringBuilder help = new StringBuilder();
+                Command c = m.getAnnotation(Command.class);
+                if(c != null)
+                {
+                    help.append(" Command Name: ").append(c.name()).append('\n');
+                    help.append(" Description: ").append(c.description()).append('\n');
+                    help.append(" Usage: \n");
+
+                    String[] args = c.args();
+
+                    help.append(" \t").append(c.name());
+                    for(String argi : args)
+                        help.append(" [").append(argi).append("]");
+
+                    this.view.help_block(help.toString());
+                }
+
+            }
+            catch (NoSuchMethodException e)
+            { this.view.invalid_arguments(); }
+        }
     }
+
 
     @Command(name = "exit", description = "Exits Program")
     public void exit()

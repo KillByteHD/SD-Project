@@ -20,7 +20,7 @@ public class ServerInit
 
         while(true)
         {
-            new Thread(new ServerThread(ss.accept(),data))
+            new ServerThread(ss.accept(),data)
                     .start();
         }
     }
