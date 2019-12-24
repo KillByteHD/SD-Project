@@ -20,7 +20,6 @@ public class ServerInit
         WorkerPool pool = new WorkerPool(data,buffer);
         pool.init();
 
-
         while(true)
         {
             new ServerThread(ss.accept(),buffer)

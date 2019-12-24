@@ -19,15 +19,43 @@ public class C2DRequest
         {
             return username;
         }
-
         public String getPassword()
         {
             return password;
         }
 
+        @Override
         public String write()
         {
             return "login:" + username + ":" + password;
+        }
+    }
+
+    public static class Register implements Request
+    {
+        private String username;
+        private String password;
+
+        public Register(String username, String password)
+        {
+            this.username = username;
+            this.password = password;
+        }
+
+
+        public String getUsername()
+        {
+            return username;
+        }
+        public String getPassword()
+        {
+            return password;
+        }
+
+        @Override
+        public String write()
+        {
+            return "register:" + username + ":" + password;
         }
     }
 
@@ -41,6 +69,8 @@ public class C2DRequest
             {
                 case "login":
                     return new C2DRequest.Login(args[1],args[2]);
+                case "register":
+                    return new C2DRequest.Register(args[1],args[2]);
             }
         }
         catch (Exception e) { }
