@@ -2,10 +2,11 @@ package Common.Protocol;
 
 import Common.Exceptions.ExceptionCode;
 import Common.Exceptions.ProtocolParseError;
+import Common.Model.Genre;
 
 public class C2DReply
 {
-    //TODO: FAKHSDFKASHDBF O NOME TA IGUAL AO REQUEST CARALHO ... AQUI NAO HA NAMESPACES HO MONGA DE MERDA
+
     public static class Login implements Reply
     {
         private ExceptionCode status;
@@ -34,7 +35,7 @@ public class C2DReply
 
         public String write()
         {
-            return (this.status == null) ? "logged:"+this.auth : "err:"+status.ordinal();
+            return (this.status == null) ? "logged:"+this.auth : "l_err:"+status.ordinal();
         }
     }
 
@@ -56,9 +57,42 @@ public class C2DReply
         @Override
         public String write()
         {
-            return (this.status == null) ? "registered" : "err:"+status.ordinal();
+            return (this.status == null) ? "registered" : "r_err:"+status.ordinal();
         }
     }
+
+    public static class Download implements Reply
+    {
+        private String name;
+        private String author;
+        private Genre genre;
+        private String artist;
+        public byte[] file_contents;
+
+        private ExceptionCode status;
+
+        public Download(String name, String author, Genre genre, String artist, byte[] file_contents)
+        {
+            this.name = name;
+            this.author = author;
+            this.genre = genre;
+            this.artist = artist;
+            this.file_contents = file_contents;
+        }
+
+        public Download(ExceptionCode code)
+        {
+            this.status = code;
+        }
+
+        //TODO: ISTO NAO TA BEM
+        @Override
+        public String write()
+        {
+            return (this.status == null) ? "music" : "d_err:"+status.ordinal();
+        }
+    }
+
 
     public static Reply parse(String str) throws ProtocolParseError
     {
@@ -67,13 +101,18 @@ public class C2DReply
             String[] args = str.split(":");
             switch (args[0])
             {
-                case "err":
+                case "l_err":
                     return new C2DReply.Login(ExceptionCode.values()[Integer.parseInt(args[1])]);
+                case "r_err":
+                    return new C2DReply.Register(ExceptionCode.values()[Integer.parseInt(args[1])]);
+                case "d_err":
+                    return new C2DReply.Download(ExceptionCode.values()[Integer.parseInt(args[1])]);
                 case "logged":
                     return new C2DReply.Login(args[1]);
                 case "registered":
                     return new C2DReply.Register();
-
+                case "download":
+                    break;
             }
         }
         catch (Exception e) { }

@@ -1,5 +1,6 @@
 package Server;
 
+import Common.Exceptions.InvalidMusic;
 import Common.Exceptions.UserAlreadyExists;
 import Common.Model.Data;
 import Common.Model.Music;
@@ -17,34 +18,35 @@ import java.util.Set;
 public class ServerData implements Data
 {
     private Map<String, User> users;
-    private Set<Music> musics;
+    private Map<String,Music> musics;
 
 
     public ServerData()
     {
         this.users = new HashMap<>();
-        this.musics = new HashSet<>();
+        this.musics = new HashMap<>();
 
         this.users.put("root",new User("root","root"));
     }
 
 
     @Override
-    public String login(String username, String password) throws InvalidLogin
+    public synchronized String login(String username, String password) throws InvalidLogin
     {
-        User u;
         try
-        { u = this.users.get(username); }
+        {
+            User u = this.users.get(username);
+
+            if(u == null || !u.checkPassword(password))
+                throw new InvalidLogin();
+
+            return u.authID();
+        }
         catch (NullPointerException | ClassCastException e)
         { throw new InvalidLogin(); }
-
-        if(u == null || !u.checkPassword(password))
-            throw new InvalidLogin();
-
-        return u.authID();
     }
 
-    public void register(String username, String password) throws UserAlreadyExists
+    public synchronized void register(String username, String password) throws UserAlreadyExists
     {
         try
         {
@@ -60,13 +62,23 @@ public class ServerData implements Data
     }
 
     @Override
-    public File download()
+    public synchronized Music download(String id_music) throws InvalidMusic
     {
-        return null;
+        try
+        {
+            Music m = this.musics.get(id_music);
+
+            if(m == null)
+                throw new InvalidMusic();
+
+            return m;
+        }
+        catch(NullPointerException | ClassCastException cce)
+        { throw new InvalidMusic(); }
     }
 
     @Override
-    public void upload(File music)
+    public synchronized void upload(String id_music)
     {
 
     }

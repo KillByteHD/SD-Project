@@ -2,6 +2,7 @@ package Server;
 
 import Common.Exceptions.ExceptionCode;
 import Common.Exceptions.InvalidLogin;
+import Common.Exceptions.InvalidMusic;
 import Common.Exceptions.UserAlreadyExists;
 import Common.Model.Data;
 import Common.Protocol.C2DReply;
@@ -23,7 +24,6 @@ public class Worker extends Thread
     {
         this.bb = bb;
         this.data = data;
-
     }
 
     @Override
@@ -81,6 +81,23 @@ public class Worker extends Thread
                 {
                     cm.println(reply.write());
                     Logger.sended(cm.getSocket(),reply.write());
+                }
+            }
+            else if(request instanceof C2DRequest.Download)
+            {
+                C2DRequest.Download tmp = (C2DRequest.Download) request;
+                try
+                {
+                    this.data.download(tmp.getIDmusic());
+                }
+                catch (InvalidMusic im)
+                {
+                    reply = new C2DReply.Download(im.getCode());
+                }
+                catch (ConnectException ce)
+                {
+                    // Nao seria possivel acontecer nesta implementacao
+                    reply = new C2DReply.Download(ExceptionCode.ServerError);
                 }
             }
         }

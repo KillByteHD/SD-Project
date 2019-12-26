@@ -93,14 +93,21 @@ public class ClientData implements Data
     }
 
     @Override
-    public File download()
+    public void download(String id_music) throws ConnectException
     {
-        return null;
+
     }
 
     @Override
-    public void upload(File music)
+    public void upload(String file_path) throws ConnectException
     {
+        /*try
+        {
 
+        }
+        catch (IOException | ProtocolParseError e)
+        {
+            throw new ConnectException();
+        }*/
     }
 }

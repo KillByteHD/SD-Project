@@ -59,6 +59,27 @@ public class C2DRequest
         }
     }
 
+    public static class Download implements Request
+    {
+        private String id_music;
+
+        public Download(String id_music)
+        {
+            this.id_music = id_music;
+        }
+
+        public String getIDmusic()
+        {
+            return id_music;
+        }
+
+        @Override
+        public String write()
+        {
+            return "download:" + id_music;
+        }
+    }
+
     public static Request parse(String str) throws ProtocolParseError
     {
         try
@@ -71,9 +92,11 @@ public class C2DRequest
                     return new C2DRequest.Login(args[1],args[2]);
                 case "register":
                     return new C2DRequest.Register(args[1],args[2]);
+                case "download":
+                    return new C2DRequest.Download(args[1]);
             }
         }
-        catch (Exception e) { }
+        catch (Exception ignored) { }
         throw new ProtocolParseError("Protocol Parse Error");
     }
 }

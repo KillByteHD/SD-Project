@@ -61,4 +61,10 @@ public class Music
     {
         return Objects.hash(name, author, genre, artist, file_path);
     }
+
+
+    public String getID()
+    {
+        return Utils.sha256String(this.name + this.artist);
+    }
 }

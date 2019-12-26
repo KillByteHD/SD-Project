@@ -38,13 +38,15 @@ public class CommandHandler
                 switch (args[0])
                 {
                     case "login":
-                        login();
+                        login(/*args*/);
                         break;
                     case "logout":
                         logout();
                         break;
                     case "register":
                         register(/*args*/);
+                        break;
+                    case "download":
                         break;
                     case "help":
                         help(args);
@@ -115,6 +117,24 @@ public class CommandHandler
                 this.view.error("User already exists");
             }
         }
+    }
+
+
+    @Command(name = "download", description = "Download a music (absolute path as argument)", args = {"file_path"})
+    public void download(String[] args) throws ConnectException
+    {
+        String id_music;
+        try
+        {
+            id_music = args[1];
+        }
+        catch (IndexOutOfBoundsException ioobe)
+        {
+            this.view.error("Invalid Arguments");
+            return;
+        }
+
+        this.data.download(id_music);
     }
 
 
