@@ -1,8 +1,10 @@
 package Client;
 
 import Common.Exceptions.InvalidLogin;
+import Common.Exceptions.InvalidMusic;
 import Common.Exceptions.UserAlreadyExists;
 import Common.Model.Data;
+import Common.Model.Music;
 
 import java.lang.reflect.Method;
 import java.net.ConnectException;
@@ -47,6 +49,7 @@ public class CommandHandler
                         register(/*args*/);
                         break;
                     case "download":
+                        download(args);
                         break;
                     case "help":
                         help(args);
@@ -120,21 +123,23 @@ public class CommandHandler
     }
 
 
-    @Command(name = "download", description = "Download a music (absolute path as argument)", args = {"file_path"})
+    @Command(name = "download", description = "Download a music (Music ID as argument)", args = {"id_music"})
     public void download(String[] args) throws ConnectException
     {
         String id_music;
         try
         {
             id_music = args[1];
+            this.data.download(id_music);
         }
         catch (IndexOutOfBoundsException ioobe)
         {
             this.view.error("Invalid Arguments");
-            return;
         }
-
-        this.data.download(id_music);
+        catch (InvalidMusic invalidMusic)
+        {
+            this.view.error("Invalid Music");
+        }
     }
 
 

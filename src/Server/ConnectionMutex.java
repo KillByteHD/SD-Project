@@ -1,9 +1,6 @@
 package Server;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 
 public class ConnectionMutex
@@ -11,6 +8,8 @@ public class ConnectionMutex
     private Socket socket;
     private BufferedReader br;
     private PrintWriter pw;
+    private DataInputStream dis;
+    private DataOutputStream dos;
 
     public ConnectionMutex(Socket socket)
     {
@@ -19,6 +18,8 @@ public class ConnectionMutex
             this.socket = socket;
             this.br = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
             this.pw = new PrintWriter(this.socket.getOutputStream());
+            this.dis = new DataInputStream(new BufferedInputStream(this.socket.getInputStream()));
+            this.dos = new DataOutputStream(new BufferedOutputStream(this.socket.getOutputStream()));
             this.pw.flush();
         }
         catch(IOException e) { }
@@ -51,5 +52,16 @@ public class ConnectionMutex
     public /*synchronized*/ String readln() throws IOException
     {
         return this.br.readLine();
+    }
+
+    public void write(byte[] bytes, int len) throws IOException
+    {
+        this.dos.write(bytes,0,len);
+    }
+
+    public byte[] read()
+    {
+        //this.dis.read();
+        return null;
     }
 }

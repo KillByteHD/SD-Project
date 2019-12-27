@@ -2,11 +2,8 @@ package Server;
 
 import Common.Exceptions.InvalidMusic;
 import Common.Exceptions.UserAlreadyExists;
-import Common.Model.Data;
-import Common.Model.Music;
-import Common.Model.User;
+import Common.Model.*;
 import Common.Exceptions.InvalidLogin;
-import Common.Model.Utils;
 
 import java.io.File;
 import java.net.ConnectException;
@@ -26,7 +23,11 @@ public class ServerData implements Data
         this.users = new HashMap<>();
         this.musics = new HashMap<>();
 
+        //Temporary Populate
         this.users.put("root",new User("root","root"));
+        Music m = new Music("hello world","bytes", Genre.COMEDY,"computer","server_music/hello_world.mp3");
+        System.out.println("hello_world ID: " + m.getID());
+        this.musics.put(m.getID(),m);
     }
 
 

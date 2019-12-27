@@ -67,17 +67,17 @@ public class C2DReply
         private String author;
         private Genre genre;
         private String artist;
-        public byte[] file_contents;
+        public long file_length;
 
         private ExceptionCode status;
 
-        public Download(String name, String author, Genre genre, String artist, byte[] file_contents)
+        public Download(String name, String author, Genre genre, String artist, long file_length)
         {
             this.name = name;
             this.author = author;
             this.genre = genre;
             this.artist = artist;
-            this.file_contents = file_contents;
+            this.file_length = file_length;
         }
 
         public Download(ExceptionCode code)
@@ -85,11 +85,40 @@ public class C2DReply
             this.status = code;
         }
 
+
+        public String getName()
+        {
+            return name;
+        }
+        public String getAuthor()
+        {
+            return author;
+        }
+        public Genre getGenre()
+        {
+            return genre;
+        }
+        public String getArtist()
+        {
+            return artist;
+        }
+        public long getFileLength()
+        {
+            return file_length;
+        }
+        public ExceptionCode getStatus()
+        {
+            return status;
+        }
+
+
         //TODO: ISTO NAO TA BEM
         @Override
         public String write()
         {
-            return (this.status == null) ? "music" : "d_err:"+status.ordinal();
+            return (this.status == null) ? "music:"+this.name+
+                    ":"+this.author+":"+this.genre.ordinal()+":"+this.artist+
+                    ":"+this.file_length : "d_err:"+status.ordinal();
         }
     }
 
@@ -111,8 +140,9 @@ public class C2DReply
                     return new C2DReply.Login(args[1]);
                 case "registered":
                     return new C2DReply.Register();
-                case "download":
-                    break;
+                case "music":
+                    return new C2DReply.Download(args[1],args[2],Genre.values()[Integer.parseInt(args[3])],
+                            args[4],Long.parseLong(args[5]));
             }
         }
         catch (Exception e) { }
