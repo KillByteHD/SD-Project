@@ -157,7 +157,9 @@ public class CommandHandler
             String artist = args[4];
             String file_name = args[5];
 
-            System.out.println("Correct " + genre.ordinal() + " " + genre.toString());
+            Music m = new Music(name,author,genre,artist,file_name);
+            this.data.upload(m);
+            //System.out.println("Correct " + genre.ordinal() + " " + genre.toString());
         }
         catch (IndexOutOfBoundsException ioobe)
         {

@@ -127,10 +127,29 @@ public class C2DReply
         {
             return (this.status == null) ? "music:"+this.name+
                     ":"+this.author+":"+this.genre.ordinal()+":"+this.artist+
-                    ":"+this.file_name+":"+this.file_length : "d_err:"+status.ordinal();
+                    ":"+this.file_name+":"+this.file_length : "d_err:"+this.status.ordinal();
         }
     }
 
+    public static class Upload implements Reply
+    {
+        private ExceptionCode status;
+
+        public Upload()
+        {
+            this.status = null;
+        }
+        public Upload(ExceptionCode code)
+        {
+            this.status = code;
+        }
+
+        @Override
+        public String write()
+        {
+            return (this.status == null) ? "uploaded" : "u_err:"+this.status.ordinal();
+        }
+    }
 
 
     public static Reply parse(String str) throws ProtocolParseError
@@ -153,6 +172,8 @@ public class C2DReply
                 case "music":
                     return new C2DReply.Download(args[1],args[2],Genre.values()[Integer.parseInt(args[3])],
                             args[4],args[5],Long.parseLong(args[6]));
+                case "uploaded":
+                    return new C2DReply.Upload();
             }
         }
         catch (Exception e) { }

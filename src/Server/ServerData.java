@@ -79,7 +79,7 @@ public class ServerData implements Data
     }
 
     @Override
-    public synchronized void upload(String id_music)
+    public synchronized void upload(Music music)
     {
 
     }

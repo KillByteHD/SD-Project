@@ -94,11 +94,12 @@ public class ClientData implements Data
     {
         try
         {
+            //Ask to download a music with id id_music
             Request request = new C2DRequest.Download(id_music);
             this.pw.println(request.write());
 
             String in = this.br.readLine();
-            System.out.println((in != null) ? in : "(null)");
+            //Debug//System.out.println((in != null) ? in : "(null)");
             if(in == null)
                 throw new ConnectException();
 
@@ -145,15 +146,28 @@ public class ClientData implements Data
     }
 
     @Override
-    public void upload(String file_path) throws ConnectException
+    public void upload(Music music) throws ConnectException
     {
-        /*try
+
+        try
         {
+            // This is just to get the file length
+            File file = new File(ClientData.class.getResource("../") + "client_music/"+music.getFileName());
+            //Send request to upload with meta data already included
+            Request request = new C2DRequest.Upload(music.getName(),
+                    music.getAuthor(),music.getGenre(),music.getArtist(),
+                    music.getFileName(),file.length());
+            this.pw.println(request.write());
+
+            String in = this.br.readLine();
+            if(in == null)
+                throw new ConnectException();
+
 
         }
         catch (IOException | ProtocolParseError e)
         {
             throw new ConnectException();
-        }*/
+        }
     }
 }
