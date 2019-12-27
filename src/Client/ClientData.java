@@ -14,7 +14,7 @@ import java.net.Socket;
 public class ClientData implements Data
 {
     private final int CONNECT_DELAY = 3;
-    private final int MAX_SIZE = 8192;
+    private final int MAX_SIZE = 8*1024;
 
     private Socket socket;
     private BufferedReader br;
@@ -31,8 +31,8 @@ public class ClientData implements Data
                 this.socket = new Socket("localhost",1111);
                 this.br = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
                 this.pw = new PrintWriter(this.socket.getOutputStream(),true);
-                this.dis = new DataInputStream(new BufferedInputStream(this.socket.getInputStream()));
-                this.dos = new DataOutputStream(new BufferedOutputStream(this.socket.getOutputStream()));
+                this.dis = new DataInputStream(this.socket.getInputStream());
+                this.dos = new DataOutputStream(this.socket.getOutputStream());
                 break;
             }
             catch (IOException e)
@@ -79,17 +79,9 @@ public class ClientData implements Data
             if(in == null)
                 throw new ConnectException();
 
-            try
-            {
-                C2DReply.Register reply = (C2DReply.Register) C2DReply.parse(in);
-            }
-            catch (ClassCastException cce)
-            {
-                C2DReply.Login reply = (C2DReply.Login) C2DReply.parse(in);
-
-                if(reply.getStatus() == ExceptionCode.UserAlreadyExists)
-                    throw new UserAlreadyExists();
-            }
+            C2DReply.Register reply = (C2DReply.Register) C2DReply.parse(in);
+            if(reply.getStatus() == ExceptionCode.InvalidMusic)
+                throw new UserAlreadyExists();
         }
         catch (IOException | ProtocolParseError e)
         {
@@ -123,38 +115,24 @@ public class ClientData implements Data
             //System.out.println("Directory created: " + file.mkdir());
             System.out.println("File created: " + file.createNewFile());
 
-            try
+            try(FileOutputStream fos = new FileOutputStream(file);)
             {
-                FileOutputStream fos = new FileOutputStream(file);
                 int count;
                 byte[] bytes = new byte[MAX_SIZE];
-                /*for(long length = reply.getFileLength() ; length > 0 ; length -= count)
+                long length = reply.getFileLength();
+                for(; length > 0 ; length -= count)
                 {
                     System.out.println("length : " + length);
-                    System.out.println("Vou tentar ler : " + ((MAX_SIZE > length) ? length : MAX_SIZE));
+                    System.out.println("Trying to read : " + ((MAX_SIZE > length) ? length : MAX_SIZE));
 
                     count = this.dis.read(bytes,0,(MAX_SIZE > length) ? (int) length : MAX_SIZE);
                     System.out.println("Received: " + count + " bytes");
 
                     fos.write(bytes,0,count);
-                }*/
-                long length = reply.getFileLength();
-                int i = 0;
-                while((count = this.dis.read(bytes,0,(MAX_SIZE > length) ? (int)length : MAX_SIZE)) > 0 && length > 0)
-                {
-                    System.out.println("Received: " + count + " bytes");
-
-                    fos.write(bytes,0,count);
-
-                    length -= count;
-                    System.out.println(i + " length : " + length);
-                    i++;
                 }
-                //System.out.println("Received: " + count + " bytes");
                 System.out.println("exited loop");
-                fos.close();
             }
-            catch (IOException ignored)
+            catch (IOException ioe)
             {
                 System.out.println("Connection error");
             }

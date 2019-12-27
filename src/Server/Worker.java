@@ -18,6 +18,8 @@ import java.net.ConnectException;
 
 public class Worker extends Thread
 {
+    private final int MAX_SIZE = 8*1024;
+
     private BoundedBuffer<Tuple<ConnectionMutex, Request>> bb;
     private Data data;
 
@@ -120,10 +122,9 @@ public class Worker extends Thread
             Logger.sended(cm.getSocket(),reply.write());
 
             // Download file as byte[]
-            try
+            try(FileInputStream fis = new FileInputStream(file);)
             {
-                FileInputStream fis = new FileInputStream(file);
-                byte[] bytes = new byte[8192];
+                byte[] bytes = new byte[MAX_SIZE];
 
                 System.out.println("Sending File");
                 int count;
@@ -132,8 +133,6 @@ public class Worker extends Thread
                     System.out.println("Sended:" + count + " bytes");
                     cm.write(bytes,count);
                 }
-                System.out.println("exited loop");
-                fis.close();
             }
             catch (IOException ioe)
             {

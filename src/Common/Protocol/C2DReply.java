@@ -53,6 +53,10 @@ public class C2DReply
             this.status = code;
         }
 
+        public ExceptionCode getStatus()
+        {
+            return status;
+        }
 
         @Override
         public String write()

@@ -18,8 +18,8 @@ public class ConnectionMutex
             this.socket = socket;
             this.br = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
             this.pw = new PrintWriter(this.socket.getOutputStream());
-            this.dis = new DataInputStream(new BufferedInputStream(this.socket.getInputStream()));
-            this.dos = new DataOutputStream(new BufferedOutputStream(this.socket.getOutputStream()));
+            this.dis = new DataInputStream(this.socket.getInputStream());
+            this.dos = new DataOutputStream(this.socket.getOutputStream());
             this.pw.flush();
         }
         catch(IOException e) { }
