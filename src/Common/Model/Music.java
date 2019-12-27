@@ -37,9 +37,14 @@ public class Music
     {
         return artist;
     }
-    public String getFile_path()
+    public String getFilePath()
     {
         return file_path;
+    }
+    public String getFileName()
+    {
+        String[] tmp = this.file_path.split("/");
+        return tmp[tmp.length-1];
     }
 
 

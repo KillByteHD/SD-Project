@@ -102,16 +102,14 @@ public class ClientData implements Data
             if(in == null)
                 throw new ConnectException();
 
-
-
             // Receive meta data
             C2DReply.Download reply = (C2DReply.Download) C2DReply.parse(in);
             if(reply.getStatus() == ExceptionCode.InvalidMusic)
                 throw new InvalidMusic();
 
-
             // Receive file bytes
-            File file = new File(ClientInit.class.getResource("../").getPath() + "client_music/hello_world.mp3");
+            final String file_path = "client_music/"+reply.getFileName();
+            File file = new File(ClientInit.class.getResource("../").getPath() + file_path);
             //System.out.println("Directory created: " + file.mkdir());
             System.out.println("File created: " + file.createNewFile());
 
@@ -137,19 +135,11 @@ public class ClientData implements Data
                 System.out.println("Connection error");
             }
 
-
-
             return new Music(reply.getName(), reply.getAuthor(), reply.getGenre(),
-                    reply.getArtist(), "client_music/hello_world.mp3");
+                    reply.getArtist(), file_path);
         }
-        catch (IOException e)
+        catch (IOException | ProtocolParseError e)
         {
-            System.out.println("IOException");
-            throw new ConnectException();
-        }
-        catch (ProtocolParseError ppe)
-        {
-            System.out.println("ProtocolParseError");
             throw new ConnectException();
         }
     }

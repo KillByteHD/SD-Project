@@ -71,16 +71,18 @@ public class C2DReply
         private String author;
         private Genre genre;
         private String artist;
-        public long file_length;
+        private String file_name;
+        private long file_length;
 
         private ExceptionCode status;
 
-        public Download(String name, String author, Genre genre, String artist, long file_length)
+        public Download(String name, String author, Genre genre, String artist, String file_name, long file_length)
         {
             this.name = name;
             this.author = author;
             this.genre = genre;
             this.artist = artist;
+            this.file_name = file_name;
             this.file_length = file_length;
         }
 
@@ -106,6 +108,10 @@ public class C2DReply
         {
             return artist;
         }
+        public String getFileName()
+        {
+            return file_name;
+        }
         public long getFileLength()
         {
             return file_length;
@@ -116,15 +122,15 @@ public class C2DReply
         }
 
 
-        //TODO: ISTO NAO TA BEM
         @Override
         public String write()
         {
             return (this.status == null) ? "music:"+this.name+
                     ":"+this.author+":"+this.genre.ordinal()+":"+this.artist+
-                    ":"+this.file_length : "d_err:"+status.ordinal();
+                    ":"+this.file_name+":"+this.file_length : "d_err:"+status.ordinal();
         }
     }
+
 
 
     public static Reply parse(String str) throws ProtocolParseError
@@ -146,7 +152,7 @@ public class C2DReply
                     return new C2DReply.Register();
                 case "music":
                     return new C2DReply.Download(args[1],args[2],Genre.values()[Integer.parseInt(args[3])],
-                            args[4],Long.parseLong(args[5]));
+                            args[4],args[5],Long.parseLong(args[6]));
             }
         }
         catch (Exception e) { }

@@ -4,6 +4,7 @@ import Common.Exceptions.InvalidLogin;
 import Common.Exceptions.InvalidMusic;
 import Common.Exceptions.UserAlreadyExists;
 import Common.Model.Data;
+import Common.Model.Genre;
 import Common.Model.Music;
 
 import java.lang.reflect.Method;
@@ -50,6 +51,9 @@ public class CommandHandler
                         break;
                     case "download":
                         download(args);
+                        break;
+                    case "upload":
+                        upload(args);
                         break;
                     case "help":
                         help(args);
@@ -126,10 +130,9 @@ public class CommandHandler
     @Command(name = "download", description = "Download a music (Music ID as argument)", args = {"id_music"})
     public void download(String[] args) throws ConnectException
     {
-        String id_music;
         try
         {
-            id_music = args[1];
+            String id_music = args[1];
             this.data.download(id_music);
         }
         catch (IndexOutOfBoundsException ioobe)
@@ -138,10 +141,33 @@ public class CommandHandler
         }
         catch (InvalidMusic invalidMusic)
         {
-            this.view.error("Invalid Music");
+            this.view.error("Invalid Number of Arguments");
         }
     }
 
+
+    @Command(name = "upload", description = "Upload a music from the client folder", args = {"name","author","genre","artist","file_name"})
+    public void upload(String[] args) throws ConnectException
+    {
+        try
+        {
+            String name = args[1];
+            String author = args[2];
+            Genre genre = Genre.valueOf(args[3]);
+            String artist = args[4];
+            String file_name = args[5];
+
+            System.out.println("Correct " + genre.ordinal() + " " + genre.toString());
+        }
+        catch (IndexOutOfBoundsException ioobe)
+        {
+            this.view.error("Invalid Number of Arguments");
+        }
+        catch (IllegalArgumentException iae)
+        {
+            this.view.error("Invalid Genre");
+        }
+    }
 
     @Command(name = "help", description = "Help Command", args = {"command"})
     public void help(String[] args)

@@ -39,28 +39,28 @@ public class Worker extends Thread
             Tuple<ConnectionMutex, Request> tuple = bb.get();
             ConnectionMutex cm = tuple.fst();
             Request request = tuple.snd();
-            Reply reply = null;
+
 
             // Which type of work is it?
             if(request instanceof C2DRequest.Login)
-                login_work(request,reply,cm);
+                login_work((C2DRequest.Login) request,cm);
 
             else if(request instanceof C2DRequest.Register)
-                register_work(request,reply,cm);
+                register_work((C2DRequest.Register) request,cm);
 
             else if(request instanceof C2DRequest.Download)
-                download_work(request,reply,cm);
-
+                download_work((C2DRequest.Download) request,cm);
         }
     }
 
 
-    private void login_work(Request request, Reply reply, ConnectionMutex cm)
+    private void login_work(C2DRequest.Login request, ConnectionMutex cm)
     {
-        C2DRequest.Login tmp = (C2DRequest.Login) request;
+        Reply reply = null;
+
         try
         {
-            String auth = this.data.login(tmp.getUsername(),tmp.getPassword());
+            String auth = this.data.login(request.getUsername(),request.getPassword());
             reply = new C2DReply.Login(auth);
         }
         catch (InvalidLogin ile)
@@ -79,12 +79,13 @@ public class Worker extends Thread
         }
     }
 
-    private void register_work(Request request, Reply reply, ConnectionMutex cm)
+    private void register_work(C2DRequest.Register request, ConnectionMutex cm)
     {
-        C2DRequest.Register tmp = (C2DRequest.Register) request;
+        Reply reply = null;
+
         try
         {
-            this.data.register(tmp.getUsername(),tmp.getPassword());
+            this.data.register(request.getUsername(),request.getPassword());
             reply = new C2DReply.Register();
         }
         catch (UserAlreadyExists uae)
@@ -103,34 +104,35 @@ public class Worker extends Thread
         }
     }
 
-    private void download_work(Request request, Reply reply, ConnectionMutex cm)
+    private void download_work(C2DRequest.Download request, ConnectionMutex cm)
     {
-        C2DRequest.Download tmp = (C2DRequest.Download) request;
+        Reply reply = null;
+
         try
         {
-            Music m = this.data.download(tmp.getIDmusic());
-            System.out.println("Music : " + m.getName());
+            Music m = this.data.download(request.getIDmusic());
+            //Debug//System.out.println("Music : " + m.getName());
 
             //Send File
-            File file = new File(ClientInit.class.getResource("../").getPath() + m.getFile_path());
+            File file = new File(ClientInit.class.getResource("../").getPath() + m.getFilePath());
             long length = file.length();
-            System.out.println("File size: " + length);
-            reply = new C2DReply.Download(m.getName(),m.getAuthor(),m.getGenre(),m.getArtist(),length);
+            //Debug//System.out.println("File size: " + length);
+            reply = new C2DReply.Download(m.getName(),m.getAuthor(),m.getGenre(),m.getArtist(),m.getFileName(),length);
 
             // Send meta data (preparing to download file)
             cm.println(reply.write());
             Logger.sended(cm.getSocket(),reply.write());
 
             // Download file as byte[]
-            try(FileInputStream fis = new FileInputStream(file);)
+            try(FileInputStream fis = new FileInputStream(file))
             {
                 byte[] bytes = new byte[MAX_SIZE];
 
-                System.out.println("Sending File");
+                //Debug//System.out.println("Sending File");
                 int count;
                 while((count = fis.read(bytes)) > 0)
                 {
-                    System.out.println("Sended:" + count + " bytes");
+                    //Debug//System.out.println("Sended:" + count + " bytes");
                     cm.write(bytes,count);
                 }
             }
@@ -153,6 +155,7 @@ public class Worker extends Thread
             cm.println(reply.write());
         }
     }
+
 
     public void killWorker()
     {
