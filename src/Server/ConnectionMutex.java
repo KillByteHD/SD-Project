@@ -53,6 +53,7 @@ public class ConnectionMutex
 
     public void close() throws IOException
     {
+        // Closing socket also closes Input/Output Stream
         this.socket.close();
     }
 
@@ -69,6 +70,7 @@ public class ConnectionMutex
     public /*synchronized*/ String readln() throws IOException
     {
         //this.read_lock.lock();
+        System.out.println("ENTROU NO READLN");
         String tmp = this.br.readLine();
         //this.read_lock.unlock();
         return tmp;

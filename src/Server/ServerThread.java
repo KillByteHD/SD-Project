@@ -28,10 +28,14 @@ public class ServerThread extends Thread
         while(!this.cm.isClosed())
         {
             Request request = null;
-            Reply reply = null;
 
             try
             {
+                while(true)
+                {
+                    break;
+                }
+
                 String in = this.cm.readln();
                 Logger.received(this.cm.getSocket(), in);
                 request = C2DRequest.parse(in);
@@ -44,7 +48,6 @@ public class ServerThread extends Thread
 
         try
         {
-            // Closing socket also closes Input/Output Stream
             this.cm.close();
             Logger.disconnected(this.cm.getSocket());
         }
