@@ -6,5 +6,6 @@ public enum ExceptionCode
     ProtocolParseError,
     InvalidLogin,
     UserAlreadyExists,
-    InvalidMusic
+    InvalidMusic,
+    MusicAlreadyExists
 }

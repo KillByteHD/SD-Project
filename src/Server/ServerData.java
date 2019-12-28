@@ -1,6 +1,7 @@
 package Server;
 
 import Common.Exceptions.InvalidMusic;
+import Common.Exceptions.MusicAlreadyExists;
 import Common.Exceptions.UserAlreadyExists;
 import Common.Model.*;
 import Common.Exceptions.InvalidLogin;
@@ -25,9 +26,15 @@ public class ServerData implements Data
 
         //Temporary Populate
         this.users.put("root",new User("root","root"));
-        Music m = new Music("hello world","bytes", Genre.COMEDY,"computer","server_music/hello_world.mp3");
-        System.out.println("hello_world ID: " + m.getID());
-        this.musics.put(m.getID(),m);
+        Music m1 = new Music("hello world","bytes", Genre.COMEDY,"computer","server_music/hello_world.mp3");
+        Music m2 = new Music("Demons","joji", Genre.UNDEFINED,"joji","server_music/Demons.mp3");
+        Music m3 = new Music("tmp","tmp", Genre.UNDEFINED,"tmp","server_music/tmp.txt");
+        System.out.println("hello_world ID: " + m1.getID());
+        System.out.println("Demons ID: " + m2.getID());
+        System.out.println("tmp ID: " + m3.getID());
+        this.musics.put(m1.getID(),m1);
+        this.musics.put(m2.getID(),m2);
+        this.musics.put(m3.getID(),m3);
     }
 
 
@@ -79,8 +86,17 @@ public class ServerData implements Data
     }
 
     @Override
-    public synchronized void upload(Music music)
+    public synchronized void upload(Music music) throws MusicAlreadyExists
     {
+        try
+        {
+            Music tmp = this.musics.get(music.getID());
+            if(tmp != null)
+                throw new MusicAlreadyExists();
 
+            this.musics.put(music.getID(),music);
+        }
+        catch(NullPointerException | ClassCastException cce)
+        { throw new MusicAlreadyExists(); }
     }
 }

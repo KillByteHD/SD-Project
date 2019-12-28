@@ -41,7 +41,7 @@ public enum Genre
     TRAP,
     VOCAL,
     WEDDING,
-    UNDIFINED;
+    UNDEFINED;
 
 
     public String toName()

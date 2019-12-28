@@ -144,6 +144,11 @@ public class C2DReply
             this.status = code;
         }
 
+        public ExceptionCode getStatus()
+        {
+            return status;
+        }
+
         @Override
         public String write()
         {
@@ -159,12 +164,16 @@ public class C2DReply
             String[] args = str.split(":");
             switch (args[0])
             {
+                // Match an exception
                 case "l_err":
                     return new C2DReply.Login(ExceptionCode.values()[Integer.parseInt(args[1])]);
                 case "r_err":
                     return new C2DReply.Register(ExceptionCode.values()[Integer.parseInt(args[1])]);
                 case "d_err":
                     return new C2DReply.Download(ExceptionCode.values()[Integer.parseInt(args[1])]);
+                case "u_err":
+                    return new C2DReply.Upload(ExceptionCode.values()[Integer.parseInt(args[1])]);
+                // Match a success
                 case "logged":
                     return new C2DReply.Login(args[1]);
                 case "registered":

@@ -111,10 +111,12 @@ public class ClientData implements Data
             // Receive file bytes
             final String file_path = "client_music/"+reply.getFileName();
             File file = new File(ClientInit.class.getResource("../").getPath() + file_path);
-            //System.out.println("Directory created: " + file.mkdir());
-            System.out.println("File created: " + file.createNewFile());
+            // Create file if not exists
+            System.out.println("path : " + file.getPath());
+            System.out.println("FIle created : " + file.createNewFile());
 
-            try(FileOutputStream fos = new FileOutputStream(file);)
+
+            try(FileOutputStream fos = new FileOutputStream(file))
             {
                 int count;
                 byte[] bytes = new byte[MAX_SIZE];
@@ -122,7 +124,7 @@ public class ClientData implements Data
                 for(; length > 0 ; length -= count)
                 {
                     System.out.println("length : " + length);
-                    System.out.println("Trying to read : " + ((MAX_SIZE > length) ? length : MAX_SIZE));
+                    System.out.println("Trying to write : " + ((MAX_SIZE > length) ? length : MAX_SIZE));
 
                     count = this.dis.read(bytes,0,(MAX_SIZE > length) ? (int) length : MAX_SIZE);
                     System.out.println("Received: " + count + " bytes");
@@ -146,13 +148,16 @@ public class ClientData implements Data
     }
 
     @Override
-    public void upload(Music music) throws ConnectException
+    public void upload(Music music) throws MusicAlreadyExists, ConnectException
     {
 
         try
         {
             // This is just to get the file length
-            File file = new File(ClientData.class.getResource("../") + "client_music/"+music.getFileName());
+            File file = new File(ClientData.class.getResource("../").getPath() + "client_music/"+music.getFileName());
+
+            System.out.println(file.getPath());
+
             //Send request to upload with meta data already included
             Request request = new C2DRequest.Upload(music.getName(),
                     music.getAuthor(),music.getGenre(),music.getArtist(),
@@ -163,7 +168,27 @@ public class ClientData implements Data
             if(in == null)
                 throw new ConnectException();
 
+            // Receive confirmation to upload
+            C2DReply.Upload reply = (C2DReply.Upload) C2DReply.parse(in);
+            if(reply.getStatus() == ExceptionCode.MusicAlreadyExists)
+                throw new MusicAlreadyExists();
 
+
+            try(FileInputStream fis = new FileInputStream(file))
+            {
+                byte[] bytes = new byte[MAX_SIZE];
+                int count;
+                while((count = fis.read(bytes)) > 0)
+                {
+                    System.out.println("Sended:" + count + " bytes");
+                    this.dos.write(bytes,0,count);
+                }
+                System.out.println("exited loop");
+            }
+            catch (IOException ioe)
+            {
+                ioe.printStackTrace();
+            }
         }
         catch (IOException | ProtocolParseError e)
         {

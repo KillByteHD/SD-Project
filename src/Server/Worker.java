@@ -1,10 +1,7 @@
 package Server;
 
 import Client.ClientInit;
-import Common.Exceptions.ExceptionCode;
-import Common.Exceptions.InvalidLogin;
-import Common.Exceptions.InvalidMusic;
-import Common.Exceptions.UserAlreadyExists;
+import Common.Exceptions.*;
 import Common.Model.Data;
 import Common.Model.Music;
 import Common.Protocol.C2DReply;
@@ -50,6 +47,9 @@ public class Worker extends Thread
 
             else if(request instanceof C2DRequest.Download)
                 download_work((C2DRequest.Download) request,cm);
+
+            else if(request instanceof C2DRequest.Upload)
+                upload_work((C2DRequest.Upload) request,cm);
         }
     }
 
@@ -113,8 +113,8 @@ public class Worker extends Thread
             Music m = this.data.download(request.getIDmusic());
             //Debug//System.out.println("Music : " + m.getName());
 
-            //Send File
-            File file = new File(ClientInit.class.getResource("../").getPath() + m.getFilePath());
+            // See file length
+            File file = new File(Worker.class.getResource("../").getPath() + m.getFilePath());
             long length = file.length();
             //Debug//System.out.println("File size: " + length);
             reply = new C2DReply.Download(m.getName(),m.getAuthor(),m.getGenre(),m.getArtist(),m.getFileName(),length);
@@ -130,11 +130,13 @@ public class Worker extends Thread
 
                 //Debug//System.out.println("Sending File");
                 int count;
+                cm.write_lock();
                 while((count = fis.read(bytes)) > 0)
                 {
                     //Debug//System.out.println("Sended:" + count + " bytes");
                     cm.write(bytes,count);
                 }
+                cm.write_unlock();
             }
             catch (IOException ioe)
             {
@@ -156,6 +158,62 @@ public class Worker extends Thread
         }
     }
 
+    private void upload_work(C2DRequest.Upload request, ConnectionMutex cm)
+    {
+        Reply reply = null;
+
+        try
+        {
+            Music m = new Music(request.getName(),request.getAuthor(),
+                    request.getGenre(),request.getArtist(),
+                    "server_music/" + request.getFileName());
+            this.data.upload(m);
+
+
+            // Send upload confirmation (preparing to upload file)
+            reply = new C2DReply.Upload();
+            cm.println(reply.write());
+            Logger.sended(cm.getSocket(),reply.write());
+
+            ///////////////////////////////////////////////////////////////////
+
+            File file = new File(Worker.class.getResource("../").getPath() + m.getFilePath());
+            // Create file if not exists
+            file.createNewFile();
+
+            try(FileOutputStream fos = new FileOutputStream(file))
+            {
+                int count;
+                byte[] bytes = new byte[MAX_SIZE];
+                long length = request.getFileLength();
+                cm.read_lock();
+                for(; length > 0 ; length -= count)
+                {
+                    count = cm.read(bytes,(MAX_SIZE > length) ? (int) length : MAX_SIZE);
+                    System.out.println("Received: " + count + " bytes");
+                    fos.write(bytes,0,count);
+                }
+                cm.read_unlock();
+                System.out.println("exited loop");
+            }
+        }
+        catch (MusicAlreadyExists mae)
+        {
+            reply = new C2DReply.Upload(mae.getCode());
+            cm.println(reply.write());
+            Logger.sended(cm.getSocket(),reply.write());
+        }
+        catch (ConnectException ce)
+        {
+            // Nao seria possivel acontecer nesta implementacao
+            reply = new C2DReply.Upload(ExceptionCode.ServerError);
+            cm.println(reply.write());
+        }
+        catch (IOException ioe)
+        {
+            ioe.printStackTrace();
+        }
+    }
 
     public void killWorker()
     {

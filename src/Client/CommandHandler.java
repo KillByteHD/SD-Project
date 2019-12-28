@@ -2,6 +2,7 @@ package Client;
 
 import Common.Exceptions.InvalidLogin;
 import Common.Exceptions.InvalidMusic;
+import Common.Exceptions.MusicAlreadyExists;
 import Common.Exceptions.UserAlreadyExists;
 import Common.Model.Data;
 import Common.Model.Genre;
@@ -168,6 +169,10 @@ public class CommandHandler
         catch (IllegalArgumentException iae)
         {
             this.view.error("Invalid Genre");
+        }
+        catch (MusicAlreadyExists mae)
+        {
+            this.view.error("Music Already Exists");
         }
     }
 
