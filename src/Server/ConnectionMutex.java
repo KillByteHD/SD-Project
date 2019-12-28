@@ -13,8 +13,9 @@ public class ConnectionMutex
     private DataInputStream dis;
     private DataOutputStream dos;
 
-    private Lock read_lock;
-    private Lock write_lock;
+    //private Lock read_lock;
+    //private Lock write_lock;
+    private Lock lock;
 
     public ConnectionMutex(Socket socket)
     {
@@ -27,8 +28,11 @@ public class ConnectionMutex
             this.dos = new DataOutputStream(this.socket.getOutputStream());
             this.pw.flush();
 
+            this.lock = new ReentrantLock();
+            /*
             this.read_lock = new ReentrantLock();
             this.write_lock = new ReentrantLock();
+            */
         }
         catch(IOException e)
         {
@@ -53,51 +57,41 @@ public class ConnectionMutex
     }
 
 
-    public void println(String str)
+    public /*synchronized*/ void println(String str)
     {
-        this.write_lock.lock();
+        this.lock.lock();
         this.pw.println(str);
         this.pw.flush();
-        this.write_lock.unlock();
+        this.lock.unlock();
     }
 
     //TODO: Quando o cliente for multithreaded acrescentar o syncronized aqui
     public /*synchronized*/ String readln() throws IOException
     {
-        this.read_lock.lock();
+        //this.read_lock.lock();
         String tmp = this.br.readLine();
-        this.read_lock.unlock();
+        //this.read_lock.unlock();
         return tmp;
     }
 
-    public void write(byte[] bytes, int len) throws IOException
+    public /*synchronized*/ void write(byte[] bytes, int len) throws IOException
     {
         this.dos.write(bytes,0,len);
     }
 
-    public int read(byte[] bytes, int len) throws IOException
+    public /*synchronized*/ int read(byte[] bytes, int len) throws IOException
     {
         int tmp = this.dis.read(bytes,0,len);
         return tmp;
     }
 
-    public void read_lock()
+    public void lock()
     {
-        this.read_lock.lock();
+        this.lock.lock();
     }
 
-    public void read_unlock()
+    public void unlock()
     {
-        this.read_lock.unlock();
-    }
-
-    public void write_lock()
-    {
-        this.write_lock.lock();
-    }
-
-    public void write_unlock()
-    {
-        this.write_lock.unlock();
+        this.lock.unlock();
     }
 }

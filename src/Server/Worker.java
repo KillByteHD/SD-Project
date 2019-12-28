@@ -130,13 +130,13 @@ public class Worker extends Thread
 
                 //Debug//System.out.println("Sending File");
                 int count;
-                cm.write_lock();
+                cm.lock();
                 while((count = fis.read(bytes)) > 0)
                 {
                     //Debug//System.out.println("Sended:" + count + " bytes");
                     cm.write(bytes,count);
                 }
-                cm.write_unlock();
+                cm.unlock();
             }
             catch (IOException ioe)
             {
@@ -186,14 +186,14 @@ public class Worker extends Thread
                 int count;
                 byte[] bytes = new byte[MAX_SIZE];
                 long length = request.getFileLength();
-                cm.read_lock();
+                cm.lock();
                 for(; length > 0 ; length -= count)
                 {
                     count = cm.read(bytes,(MAX_SIZE > length) ? (int) length : MAX_SIZE);
                     System.out.println("Received: " + count + " bytes");
                     fos.write(bytes,0,count);
                 }
-                cm.read_unlock();
+                cm.unlock();
                 System.out.println("exited loop");
             }
         }
