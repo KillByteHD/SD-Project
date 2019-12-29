@@ -36,7 +36,7 @@ public class User
     }
 
 
-    public String authID()
+    public String getID()
     {
         return Utils.sha256String(this.username + this.password_hash);
     }

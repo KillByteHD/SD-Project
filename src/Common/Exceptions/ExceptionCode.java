@@ -7,5 +7,7 @@ public enum ExceptionCode
     InvalidLogin,
     UserAlreadyExists,
     InvalidMusic,
-    MusicAlreadyExists
+    MusicAlreadyExists,
+    Unauthorized,
+    NotLoggedIn
 }

@@ -32,6 +32,27 @@ public class C2DRequest
         }
     }
 
+    public static class Logout implements Request
+    {
+        private String auth;
+
+        public Logout(String auth)
+        {
+            this.auth = auth;
+        }
+
+        public String getAuth()
+        {
+            return auth;
+        }
+
+        @Override
+        public String write()
+        {
+            return "logout:"+auth;
+        }
+    }
+
     public static class Register implements Request
     {
         private String username;
@@ -62,10 +83,12 @@ public class C2DRequest
 
     public static class Download implements Request
     {
+        private String auth;
         private String id_music;
 
-        public Download(String id_music)
+        public Download(String auth, String id_music)
         {
+            this.auth = auth;
             this.id_music = id_music;
         }
 
@@ -73,16 +96,22 @@ public class C2DRequest
         {
             return id_music;
         }
+        public String getAuth()
+        {
+            return auth;
+        }
 
         @Override
         public String write()
         {
-            return "download:" + id_music;
+            return "download:" + auth + ":" + id_music;
         }
     }
 
     public static class Upload implements Request
     {
+        String auth;
+
         private String name;
         private String author;
         private Genre genre;
@@ -90,8 +119,9 @@ public class C2DRequest
         private String file_name;
         private long file_length;
 
-        public Upload(String name, String author, Genre genre, String artist, String file_name, long file_length)
+        public Upload(String auth, String name, String author, Genre genre, String artist, String file_name, long file_length)
         {
+            this.auth = auth;
             this.name = name;
             this.author = author;
             this.genre = genre;
@@ -100,6 +130,10 @@ public class C2DRequest
             this.file_length = file_length;
         }
 
+        public String getAuth()
+        {
+            return auth;
+        }
         public String getName()
         {
             return name;
@@ -128,7 +162,7 @@ public class C2DRequest
         @Override
         public String write()
         {
-            return "upload:"+name+":"+author+":"+genre.ordinal()+":"+artist+":"+file_name+":"+file_length;
+            return "upload:"+auth+":"+name+":"+author+":"+genre.ordinal()+":"+artist+":"+file_name+":"+file_length;
         }
     }
 
@@ -141,14 +175,16 @@ public class C2DRequest
             {
                 case "login":
                     return new C2DRequest.Login(args[1],args[2]);
+                case "logout":
+                    return new C2DRequest.Logout(args[1]);
                 case "register":
                     return new C2DRequest.Register(args[1],args[2]);
                 case "download":
-                    return new C2DRequest.Download(args[1]);
+                    return new C2DRequest.Download(args[1],args[2]);
                 case "upload":
-                    return new C2DRequest.Upload(args[1],args[2],
-                            Genre.values()[Integer.parseInt(args[3])],
-                            args[4],args[5],Long.parseLong(args[6]));
+                    return new C2DRequest.Upload(args[1],args[2],args[3],
+                            Genre.values()[Integer.parseInt(args[4])],
+                            args[5],args[6],Long.parseLong(args[7]));
             }
         }
         catch (Exception ignored) { }

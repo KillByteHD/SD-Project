@@ -35,7 +35,33 @@ public class C2DReply
 
         public String write()
         {
-            return (this.status == null) ? "logged:"+this.auth : "l_err:"+status.ordinal();
+            return (this.status == null) ? "logged:"+this.auth : "li_err:"+status.ordinal();
+        }
+    }
+
+    public static class Logout implements Reply
+    {
+        private ExceptionCode status;
+
+        public Logout()
+        {
+            this.status = null;
+        }
+
+        public Logout(ExceptionCode status)
+        {
+            this.status = status;
+        }
+
+        public ExceptionCode getStatus()
+        {
+            return status;
+        }
+
+        @Override
+        public String write()
+        {
+            return (this.status == null) ? "logged_out" : "lo_err:"+status.ordinal();
         }
     }
 
@@ -172,8 +198,10 @@ public class C2DReply
             switch (args[0])
             {
                 // Match an exception
-                case "l_err":
+                case "li_err":
                     return new C2DReply.Login(ExceptionCode.values()[Integer.parseInt(args[1])]);
+                case "lo_err":
+                    return new C2DReply.Logout(ExceptionCode.values()[Integer.parseInt(args[1])]);
                 case "r_err":
                     return new C2DReply.Register(ExceptionCode.values()[Integer.parseInt(args[1])]);
                 case "d_err":
@@ -183,6 +211,8 @@ public class C2DReply
                 // Match a success
                 case "logged":
                     return new C2DReply.Login(args[1]);
+                case "logged_out":
+                    return new C2DReply.Logout();
                 case "registered":
                     return new C2DReply.Register();
                 case "music":

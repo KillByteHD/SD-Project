@@ -11,6 +11,7 @@ import java.io.*;
 import java.net.ConnectException;
 import java.net.Socket;
 
+// TODO: Consider adding ClassCastException
 public class ClientData implements Data
 {
     // Constraints
@@ -23,7 +24,6 @@ public class ClientData implements Data
     private BufferedReader br;
     private PrintWriter pw;
     private DataInputStream dis;
-    private DataOutputStream dos;
 
     public ClientData()
     {
@@ -35,7 +35,6 @@ public class ClientData implements Data
                 this.br = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
                 this.pw = new PrintWriter(this.socket.getOutputStream(),true);
                 this.dis = new DataInputStream(this.socket.getInputStream());
-                this.dos = new DataOutputStream(this.socket.getOutputStream());
                 break;
             }
             catch (IOException e)
@@ -71,6 +70,29 @@ public class ClientData implements Data
         }
     }
 
+    @Override
+    public void logout(String auth) throws NotLoggedIn, ConnectException
+    {
+        try
+        {
+            Request request = new C2DRequest.Logout(auth);
+            this.pw.println(request.write());
+
+            String in = this.br.readLine();
+            if(in == null)
+                throw new ConnectException();
+            C2DReply.Logout reply = (C2DReply.Logout) C2DReply.parse(in);
+
+            if(reply.getStatus() == ExceptionCode.NotLoggedIn)
+                throw new NotLoggedIn();
+        }
+        catch (IOException | ProtocolParseError e)
+        {
+            throw new ConnectException();
+        }
+    }
+
+    @Override
     public void register(String username, String password) throws UserAlreadyExists, ConnectException
     {
         try
@@ -93,12 +115,12 @@ public class ClientData implements Data
     }
 
     @Override
-    public Music download(String id_music) throws InvalidMusic, ConnectException
+    public Music download(String auth, String id_music) throws Unauthorized, InvalidMusic, ConnectException
     {
         try
         {
             //Ask to download a music with id id_music
-            Request request = new C2DRequest.Download(id_music);
+            Request request = new C2DRequest.Download(auth,id_music);
             this.pw.println(request.write());
 
             String in = this.br.readLine();
@@ -109,6 +131,8 @@ public class ClientData implements Data
             C2DReply.Download reply = (C2DReply.Download) C2DReply.parse(in);
             if(reply.getStatus() == ExceptionCode.InvalidMusic)
                 throw new InvalidMusic();
+            else if(reply.getStatus() == ExceptionCode.Unauthorized)
+                throw new Unauthorized();
 
             // Receive file bytes
             final String file_path = "client_music/"+reply.getFileName();
@@ -133,7 +157,7 @@ public class ClientData implements Data
                         fos.write(bytes,0,count);
                     }
                     //DEBUG//System.out.println("exited loop");
-                    System.out.print("Download Finished > ");
+                    System.out.print("[ Download Finished ]\n> ");
                 }
                 catch (IOException ioe)
                 {
@@ -151,7 +175,7 @@ public class ClientData implements Data
     }
 
     @Override
-    public void upload(Music music) throws MusicAlreadyExists, ConnectException
+    public void upload(String auth, Music music) throws Unauthorized, MusicAlreadyExists, ConnectException
     {
 
         try
@@ -160,7 +184,7 @@ public class ClientData implements Data
             File file = new File(ClientData.class.getResource("../").getPath() + "client_music/"+music.getFileName());
 
             //Send request to upload with meta data already included
-            Request request = new C2DRequest.Upload(music.getName(),
+            Request request = new C2DRequest.Upload(auth,music.getName(),
                     music.getAuthor(),music.getGenre(),music.getArtist(),
                     music.getFileName(),file.length());
             this.pw.println(request.write());
@@ -174,6 +198,8 @@ public class ClientData implements Data
             C2DReply.Upload reply = (C2DReply.Upload) C2DReply.parse(in);
             if(reply.getStatus() == ExceptionCode.MusicAlreadyExists)
                 throw new MusicAlreadyExists();
+            else if(reply.getStatus() == ExceptionCode.Unauthorized)
+                throw new Unauthorized();
 
 
             // Background Upload
@@ -193,7 +219,7 @@ public class ClientData implements Data
                             upload_dos.flush(); //Not necessary in this context but good practice
                         }
                         //DEBUG//System.out.println("exited loop");
-                        System.out.print("Upload Finished > ");
+                        System.out.print("[ Upload Finished ]\n> ");
                     }
                 }
                 catch (IOException ioe)

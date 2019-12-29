@@ -1,16 +1,14 @@
 package Common.Model;
 
-import Common.Exceptions.InvalidLogin;
-import Common.Exceptions.InvalidMusic;
-import Common.Exceptions.MusicAlreadyExists;
-import Common.Exceptions.UserAlreadyExists;
+import Common.Exceptions.*;
 
 import java.net.ConnectException;
 
 public interface Data
 {
     String login(String username, String password) throws InvalidLogin, ConnectException;
+    void logout(String auth) throws NotLoggedIn, ConnectException;
     void register(String username, String password) throws UserAlreadyExists, ConnectException;
-    Music download(String id_music) throws InvalidMusic, ConnectException;
-    void upload(Music music) throws MusicAlreadyExists, ConnectException;
+    Music download(String auth, String id_music) throws Unauthorized, InvalidMusic, ConnectException;
+    void upload(String auth, Music music) throws Unauthorized, MusicAlreadyExists, ConnectException;
 }

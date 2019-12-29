@@ -1,28 +1,23 @@
 package Server;
 
-import Common.Exceptions.InvalidMusic;
-import Common.Exceptions.MusicAlreadyExists;
-import Common.Exceptions.UserAlreadyExists;
+import Common.Exceptions.*;
 import Common.Model.*;
-import Common.Exceptions.InvalidLogin;
 
-import java.io.File;
-import java.net.ConnectException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 public class ServerData implements Data
 {
     private Map<String, User> users;
     private Map<String,Music> musics;
+    private SessionCache session_cache;
 
 
     public ServerData()
     {
         this.users = new HashMap<>();
         this.musics = new HashMap<>();
+        this.session_cache = new SessionCache();
 
         //Temporary Populate
         this.users.put("root",new User("root","root"));
@@ -48,10 +43,20 @@ public class ServerData implements Data
             if(u == null || !u.checkPassword(password))
                 throw new InvalidLogin();
 
-            return u.authID();
+            // Generation of session authentication token
+            String auth_token = Utils.sha256String(u.getID() + Utils.saltGenerator(8));
+            session_cache.add(auth_token);
+            return auth_token;
         }
         catch (NullPointerException | ClassCastException e)
-        { throw new InvalidLogin(); }
+        { throw new InvalidLogin(); /* Theoretically impossible */ }
+    }
+
+    @Override
+    public synchronized void logout(String auth) throws NotLoggedIn
+    {
+        if(!this.session_cache.close_session(auth))
+            throw new NotLoggedIn();
     }
 
     public synchronized void register(String username, String password) throws UserAlreadyExists
@@ -64,14 +69,17 @@ public class ServerData implements Data
                 this.users.put(username,new User(username,password));
             else
                 throw new UserAlreadyExists();
+
         }
-        catch(NullPointerException | ClassCastException cce)
-        { }
+        catch(NullPointerException cce)
+        { /* Theoretically impossible */ }
     }
 
     @Override
-    public synchronized Music download(String id_music) throws InvalidMusic
+    public synchronized Music download(String auth, String id_music) throws InvalidMusic, Unauthorized
     {
+        if(!this.session_cache.contains(auth))
+            throw new Unauthorized();
         try
         {
             Music m = this.musics.get(id_music);
@@ -79,6 +87,7 @@ public class ServerData implements Data
             if(m == null)
                 throw new InvalidMusic();
 
+            m.incrementDownloads();
             return m;
         }
         catch(NullPointerException | ClassCastException cce)
@@ -86,8 +95,10 @@ public class ServerData implements Data
     }
 
     @Override
-    public synchronized void upload(Music music) throws MusicAlreadyExists
+    public synchronized void upload(String auth, Music music) throws MusicAlreadyExists, Unauthorized
     {
+        if(!this.session_cache.contains(auth))
+            throw new Unauthorized();
         try
         {
             Music tmp = this.musics.get(music.getID());

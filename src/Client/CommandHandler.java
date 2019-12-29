@@ -1,9 +1,6 @@
 package Client;
 
-import Common.Exceptions.InvalidLogin;
-import Common.Exceptions.InvalidMusic;
-import Common.Exceptions.MusicAlreadyExists;
-import Common.Exceptions.UserAlreadyExists;
+import Common.Exceptions.*;
 import Common.Model.Data;
 import Common.Model.Genre;
 import Common.Model.Music;
@@ -93,15 +90,21 @@ public class CommandHandler
     }
 
     @Command(name = "logout", description = "Logout Process")
-    public void logout()
+    public void logout() throws ConnectException
     {
         if(this.auth != null)
         {
-            this.view.println(" - Logout Successful -");
+            try
+            { this.data.logout(this.auth); }
+            catch (NotLoggedIn nli)
+            { this.view.error("Unable to Logout"); }
+
+
             this.auth = null;
+            this.view.println(" - Logout Successful -");
         }
         else
-            this.view.println(" - Unable to Logout - ");
+            this.view.error("Unable to Logout");
     }
 
     @Command(name = "register", description = "Register a new User"/*, args = {"username" , "password", "confirm_password"}*/)
@@ -134,7 +137,12 @@ public class CommandHandler
         try
         {
             String id_music = args[1];
-            this.data.download(id_music);
+            this.data.download(this.auth,id_music);
+
+        }
+        catch (Unauthorized u)
+        {
+            this.view.error("Unauthorized please log in");
         }
         catch (IndexOutOfBoundsException ioobe)
         {
@@ -159,8 +167,12 @@ public class CommandHandler
             String file_name = args[5];
 
             Music m = new Music(name,author,genre,artist,file_name);
-            this.data.upload(m);
+            this.data.upload(this.auth,m);
             //System.out.println("Correct " + genre.ordinal() + " " + genre.toString());
+        }
+        catch (Unauthorized u)
+        {
+            this.view.error("Unauthorized please log in");
         }
         catch (IndexOutOfBoundsException ioobe)
         {
@@ -240,5 +252,4 @@ public class CommandHandler
     {
         System.exit(0);
     }
-
 }

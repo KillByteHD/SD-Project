@@ -56,13 +56,16 @@ public class ServerInit
         ServerSocket ss = new ServerSocket(PORT);
         Logger.started();
 
+        Data data = new ServerData();
+
         BoundedBuffer<Tuple<ConnectionMutex, Request>> buffer = new BoundedBuffer<>(SIZE_OTHER);
         BoundedBuffer<Tuple<ConnectionMutex, Request>> down_buffer = new BoundedBuffer<>(SIZE_DOWN);
         BoundedBuffer<Tuple<ConnectionMutex, Request>> up_buffer = new BoundedBuffer<>(SIZE_UP);
-        Data data = new ServerData();
+
         WorkerPool pool = new WorkerPool(data,buffer,MAX_OTHER);
         WorkerPool download_pool = new WorkerPool(data,down_buffer,MAX_DOWN);
         WorkerPool upload_pool = new WorkerPool(data,up_buffer,MAX_UP);
+
         pool.init();
         download_pool.init();
         upload_pool.init();

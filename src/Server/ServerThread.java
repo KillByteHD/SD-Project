@@ -3,7 +3,6 @@ package Server;
 import Common.Exceptions.ProtocolParseError;
 import Common.Model.Data;
 import Common.Protocol.C2DRequest;
-import Common.Protocol.Reply;
 import Common.Protocol.Request;
 import Server.Utils.Tuple;
 
@@ -16,6 +15,7 @@ public class ServerThread extends Thread
     private BoundedBuffer<Tuple<ConnectionMutex, Request>> buffer;
     private BoundedBuffer<Tuple<ConnectionMutex, Request>> down_buffer;
     private BoundedBuffer<Tuple<ConnectionMutex, Request>> up_buffer;
+
 
     public ServerThread(Socket socket,
                         BoundedBuffer<Tuple<ConnectionMutex, Request>> buffer,
@@ -58,6 +58,7 @@ public class ServerThread extends Thread
 
         try
         {
+
             this.cm.close();
             Logger.disconnected(this.cm.getSocket());
         }

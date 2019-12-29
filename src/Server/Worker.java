@@ -50,6 +50,9 @@ public class Worker extends Thread
             else if(request instanceof C2DRequest.Login)
                 login_work((C2DRequest.Login) request,cm);
 
+            else if(request instanceof C2DRequest.Logout)
+                logout_work((C2DRequest.Logout) request,cm);
+
             else if(request instanceof C2DRequest.Register)
                 register_work((C2DRequest.Register) request,cm);
         }
@@ -71,8 +74,33 @@ public class Worker extends Thread
         }
         catch (ConnectException ce)
         {
-            // Nao seria possivel acontecer nesta implementacao
+            // Not possible to happen in this implementation
             reply = new C2DReply.Login(ExceptionCode.ServerError);
+        }
+        finally
+        {
+            cm.println(reply.write());
+            Logger.sended(cm.getSocket(),reply.write());
+        }
+    }
+
+    private void logout_work(C2DRequest.Logout request, ConnectionMutex cm)
+    {
+        Reply reply = null;
+
+        try
+        {
+            this.data.logout(request.getAuth());
+            reply = new C2DReply.Logout();
+        }
+        catch (NotLoggedIn nli)
+        {
+            reply = new C2DReply.Logout(nli.getCode());
+        }
+        catch (ConnectException ce)
+        {
+            // Not possible to happen in this implementation
+            reply = new C2DReply.Logout(ExceptionCode.ServerError);
         }
         finally
         {
@@ -112,7 +140,7 @@ public class Worker extends Thread
 
         try
         {
-            Music m = this.data.download(request.getIDmusic());
+            Music m = this.data.download(request.getAuth(),request.getIDmusic());
             //Debug//System.out.println("Music : " + m.getName());
 
             // See file length
@@ -146,7 +174,7 @@ public class Worker extends Thread
                 ioe.printStackTrace();
             }
         }
-        catch (InvalidMusic im)
+        catch (Unauthorized | InvalidMusic im)
         {
             reply = new C2DReply.Download(im.getCode());
             cm.println(reply.write());
@@ -169,7 +197,7 @@ public class Worker extends Thread
             Music m = new Music(request.getName(),request.getAuthor(),
                     request.getGenre(),request.getArtist(),
                     "server_music/" + request.getFileName());
-            this.data.upload(m);
+            this.data.upload(request.getAuth(),m);
 
 
             // Send upload confirmation and port to create secure socket (preparing to upload file)
@@ -198,7 +226,8 @@ public class Worker extends Thread
                     for(; length > 0 ; length -= count)
                     {
                         count = dis.read(bytes,0,(MAX_SIZE > length) ? (int) length : MAX_SIZE);
-                        System.out.println("Received: " + count + " bytes");
+                        Logger.received(upload_s,count + " bytes");
+                        //System.out.println("Received: " + count + " bytes");
                         fos.write(bytes,0,count);
                         //fos.flush(); // Flush not necessary because we are in a try-with-resources clause (fos will be closed and flushed)
                     }
@@ -210,7 +239,7 @@ public class Worker extends Thread
             }
 
         }
-        catch (MusicAlreadyExists mae)
+        catch (Unauthorized | MusicAlreadyExists mae)
         {
             reply = new C2DReply.Upload(mae.getCode());
             cm.println(reply.write());
