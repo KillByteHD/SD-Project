@@ -12,6 +12,8 @@ import Server.Utils.Tuple;
 
 import java.io.*;
 import java.net.ConnectException;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 public class Worker extends Thread
 {
@@ -39,17 +41,17 @@ public class Worker extends Thread
 
 
             // Which type of work is it?
-            if(request instanceof C2DRequest.Login)
-                login_work((C2DRequest.Login) request,cm);
-
-            else if(request instanceof C2DRequest.Register)
-                register_work((C2DRequest.Register) request,cm);
-
-            else if(request instanceof C2DRequest.Download)
+            if(request instanceof C2DRequest.Download)
                 download_work((C2DRequest.Download) request,cm);
 
             else if(request instanceof C2DRequest.Upload)
                 upload_work((C2DRequest.Upload) request,cm);
+
+            else if(request instanceof C2DRequest.Login)
+                login_work((C2DRequest.Login) request,cm);
+
+            else if(request instanceof C2DRequest.Register)
+                register_work((C2DRequest.Register) request,cm);
         }
     }
 
@@ -170,32 +172,43 @@ public class Worker extends Thread
             this.data.upload(m);
 
 
-            // Send upload confirmation (preparing to upload file)
-            reply = new C2DReply.Upload();
+            // Send upload confirmation and port to create secure socket (preparing to upload file)
+            ServerSocket upload_ss = new ServerSocket(0);
+
+            reply = new C2DReply.Upload(upload_ss.getLocalPort());
             cm.println(reply.write());
             Logger.sended(cm.getSocket(),reply.write());
 
             ///////////////////////////////////////////////////////////////////
 
-            File file = new File(Worker.class.getResource("../").getPath() + m.getFilePath());
-            // Create file if not exists
-            file.createNewFile();
-
-            try(FileOutputStream fos = new FileOutputStream(file))
+            try(Socket upload_s = upload_ss.accept())
             {
-                int count;
-                byte[] bytes = new byte[MAX_SIZE];
-                long length = request.getFileLength();
-                cm.lock();
-                for(; length > 0 ; length -= count)
+                File file = new File(Worker.class.getResource("../").getPath() + m.getFilePath());
+                // Create file if not exists
+                file.createNewFile();
+
+
+                DataInputStream dis = new DataInputStream(upload_s.getInputStream());
+                try(FileOutputStream fos = new FileOutputStream(file))
                 {
-                    count = cm.read(bytes,(MAX_SIZE > length) ? (int) length : MAX_SIZE);
-                    System.out.println("Received: " + count + " bytes");
-                    fos.write(bytes,0,count);
+                    int count;
+                    byte[] bytes = new byte[MAX_SIZE];
+                    long length = request.getFileLength();
+
+                    for(; length > 0 ; length -= count)
+                    {
+                        count = dis.read(bytes,0,(MAX_SIZE > length) ? (int) length : MAX_SIZE);
+                        System.out.println("Received: " + count + " bytes");
+                        fos.write(bytes,0,count);
+                        //fos.flush(); // Flush not necessary because we are in a try-with-resources clause (fos will be closed and flushed)
+                    }
                 }
-                cm.unlock();
-                System.out.println("exited loop");
+                catch (IOException ioe)
+                {
+                    ioe.printStackTrace();
+                }
             }
+
         }
         catch (MusicAlreadyExists mae)
         {

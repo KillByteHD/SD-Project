@@ -9,6 +9,7 @@ public class Music
     private Genre genre;
     private String artist;
     private String file_path;
+    private int downloads;
 
 
     public Music(String name, String author, Genre genre, String artist, String file_path)
@@ -18,6 +19,7 @@ public class Music
         this.genre = genre;
         this.artist = artist;
         this.file_path = file_path;
+        this.downloads = 0;
     }
 
 
@@ -68,8 +70,14 @@ public class Music
     }
 
 
+    // name artist and are imutable so no need for synchronized or locks
     public String getID()
     {
         return Utils.sha256String(this.name + this.artist);
+    }
+
+    public synchronized void incrementDownloads()
+    {
+        ++this.downloads;
     }
 }

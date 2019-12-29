@@ -2,6 +2,7 @@ package Server;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -13,9 +14,8 @@ public class ConnectionMutex
     private DataInputStream dis;
     private DataOutputStream dos;
 
-    //private Lock read_lock;
-    //private Lock write_lock;
     private Lock lock;
+    /*private Condition condition;*/
 
     public ConnectionMutex(Socket socket)
     {
@@ -29,10 +29,7 @@ public class ConnectionMutex
             this.pw.flush();
 
             this.lock = new ReentrantLock();
-            /*
-            this.read_lock = new ReentrantLock();
-            this.write_lock = new ReentrantLock();
-            */
+            /*this.condition = this.lock.newCondition();*/
         }
         catch(IOException e)
         {
@@ -66,22 +63,33 @@ public class ConnectionMutex
         this.lock.unlock();
     }
 
-    //TODO: Quando o cliente for multithreaded acrescentar o syncronized aqui
-    public /*synchronized*/ String readln() throws IOException
+
+    public String readln() throws IOException
     {
+        /*while(true)
+        {
+            try
+            {
+                this.condition.await();
+                break;
+            }
+            catch (InterruptedException ignored)
+            { }
+        }*/
+
         //this.read_lock.lock();
-        System.out.println("ENTROU NO READLN");
+        //DEGBUG//System.out.println("ENTROU NO READLN");
         String tmp = this.br.readLine();
         //this.read_lock.unlock();
         return tmp;
     }
 
-    public /*synchronized*/ void write(byte[] bytes, int len) throws IOException
+    public void write(byte[] bytes, int len) throws IOException
     {
         this.dos.write(bytes,0,len);
     }
 
-    public /*synchronized*/ int read(byte[] bytes, int len) throws IOException
+    public int read(byte[] bytes, int len) throws IOException
     {
         int tmp = this.dis.read(bytes,0,len);
         return tmp;

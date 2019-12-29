@@ -134,10 +134,12 @@ public class C2DReply
     public static class Upload implements Reply
     {
         private ExceptionCode status;
+        private int port;
 
-        public Upload()
+        public Upload(int port)
         {
             this.status = null;
+            this.port = port;
         }
         public Upload(ExceptionCode code)
         {
@@ -149,10 +151,15 @@ public class C2DReply
             return status;
         }
 
+        public int getPort()
+        {
+            return port;
+        }
+
         @Override
         public String write()
         {
-            return (this.status == null) ? "uploaded" : "u_err:"+this.status.ordinal();
+            return (this.status == null) ? "uploaded:" + this.port : "u_err:"+this.status.ordinal();
         }
     }
 
@@ -182,7 +189,7 @@ public class C2DReply
                     return new C2DReply.Download(args[1],args[2],Genre.values()[Integer.parseInt(args[3])],
                             args[4],args[5],Long.parseLong(args[6]));
                 case "uploaded":
-                    return new C2DReply.Upload();
+                    return new C2DReply.Upload(Integer.parseInt(args[1]));
             }
         }
         catch (Exception e) { }

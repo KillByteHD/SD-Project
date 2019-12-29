@@ -6,7 +6,6 @@ import Server.Utils.Tuple;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.ServerSocket;
 import java.util.Properties;
 
@@ -58,12 +57,18 @@ public class ServerInit
         Logger.started();
 
         BoundedBuffer<Tuple<ConnectionMutex, Request>> buffer = new BoundedBuffer<>(SIZE_OTHER);
+        BoundedBuffer<Tuple<ConnectionMutex, Request>> down_buffer = new BoundedBuffer<>(SIZE_DOWN);
+        BoundedBuffer<Tuple<ConnectionMutex, Request>> up_buffer = new BoundedBuffer<>(SIZE_UP);
         Data data = new ServerData();
         WorkerPool pool = new WorkerPool(data,buffer,MAX_OTHER);
+        WorkerPool download_pool = new WorkerPool(data,down_buffer,MAX_DOWN);
+        WorkerPool upload_pool = new WorkerPool(data,up_buffer,MAX_UP);
         pool.init();
+        download_pool.init();
+        upload_pool.init();
 
         while(true)
-            new ServerThread(ss.accept(),buffer)
+            new ServerThread(ss.accept(),buffer,down_buffer,up_buffer)
                     .start();
     }
 }

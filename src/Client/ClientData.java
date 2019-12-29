@@ -13,9 +13,12 @@ import java.net.Socket;
 
 public class ClientData implements Data
 {
+    // Constraints
     private final int CONNECT_DELAY = 3;
     private final int MAX_SIZE = 8*1024;
+    private final String SERVER_ADDRESS = "localhost";
 
+    // Variables
     private Socket socket;
     private BufferedReader br;
     private PrintWriter pw;
@@ -28,7 +31,7 @@ public class ClientData implements Data
         {
             try
             {
-                this.socket = new Socket("localhost",1111);
+                this.socket = new Socket(SERVER_ADDRESS,1111);
                 this.br = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
                 this.pw = new PrintWriter(this.socket.getOutputStream(),true);
                 this.dis = new DataInputStream(this.socket.getInputStream());
@@ -113,30 +116,34 @@ public class ClientData implements Data
             File file = new File(ClientInit.class.getResource("../").getPath() + file_path);
             // Create file if not exists
             System.out.println("path : " + file.getPath());
-            System.out.println("FIle created : " + file.createNewFile());
+            System.out.println("File created : " + file.createNewFile());
 
-
-            try(FileOutputStream fos = new FileOutputStream(file))
+            // Background Download
+            new Thread(() ->
             {
-                int count;
-                byte[] bytes = new byte[MAX_SIZE];
-                long length = reply.getFileLength();
-                for(; length > 0 ; length -= count)
+                try(FileOutputStream fos = new FileOutputStream(file))
                 {
-                    System.out.println("length : " + length);
-                    System.out.println("Trying to write : " + ((MAX_SIZE > length) ? length : MAX_SIZE));
+                    int count;
+                    byte[] bytes = new byte[MAX_SIZE];
+                    long length = reply.getFileLength();
+                    for(; length > 0 ; length -= count)
+                    {
+                        System.out.println("length : " + length);
+                        System.out.println("Trying to write : " + ((MAX_SIZE > length) ? length : MAX_SIZE));
 
-                    count = this.dis.read(bytes,0,(MAX_SIZE > length) ? (int) length : MAX_SIZE);
-                    System.out.println("Received: " + count + " bytes");
+                        count = this.dis.read(bytes,0,(MAX_SIZE > length) ? (int) length : MAX_SIZE);
+                        System.out.println("Received: " + count + " bytes");
 
-                    fos.write(bytes,0,count);
+                        fos.write(bytes,0,count);
+                    }
+                    System.out.println("exited loop");
                 }
-                System.out.println("exited loop");
-            }
-            catch (IOException ioe)
-            {
-                System.out.println("Connection error");
-            }
+                catch (IOException ioe)
+                {
+                    System.out.println("Connection error");
+                }
+            }).start();
+
 
             return new Music(reply.getName(), reply.getAuthor(), reply.getGenre(),
                     reply.getArtist(), file_path);
@@ -164,7 +171,9 @@ public class ClientData implements Data
                     music.getFileName(),file.length());
             this.pw.println(request.write());
 
+
             String in = this.br.readLine();
+            System.out.println("Received: " + in);
             if(in == null)
                 throw new ConnectException();
 
@@ -174,21 +183,32 @@ public class ClientData implements Data
                 throw new MusicAlreadyExists();
 
 
-            try(FileInputStream fis = new FileInputStream(file))
+            // Background Upload
+            System.out.println("Starting Background Upload");
+            new Thread(() ->
             {
-                byte[] bytes = new byte[MAX_SIZE];
-                int count;
-                while((count = fis.read(bytes)) > 0)
+                System.out.println("Inside Thread");
+                try(Socket upload_s = new Socket(SERVER_ADDRESS,reply.getPort()))
                 {
-                    System.out.println("Sended:" + count + " bytes");
-                    this.dos.write(bytes,0,count);
+                    DataOutputStream upload_dos = new DataOutputStream(upload_s.getOutputStream());
+                    try(FileInputStream fis = new FileInputStream(file))
+                    {
+                        byte[] bytes = new byte[MAX_SIZE];
+                        int count;
+                        while((count = fis.read(bytes)) > 0)
+                        {
+                            System.out.println("Sended:" + count + " bytes");
+                            upload_dos.write(bytes,0,count);
+                            upload_dos.flush(); //Not necessary in this context but good practice
+                        }
+                        //DEBUG//System.out.println("exited loop");
+                    }
                 }
-                System.out.println("exited loop");
-            }
-            catch (IOException ioe)
-            {
-                ioe.printStackTrace();
-            }
+                catch (IOException ioe)
+                {
+                    ioe.printStackTrace();
+                }
+            }).start();
         }
         catch (IOException | ProtocolParseError e)
         {

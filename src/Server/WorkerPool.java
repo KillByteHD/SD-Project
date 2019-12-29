@@ -27,8 +27,8 @@ public class WorkerPool
         for (int i = 0; i < this.WORKERS; i++)
             ts[i] = new Worker(this.buffer,this.data);
 
-        for (int i = 0; i < this.WORKERS; i++)
-            ts[i].setName("Worker " + (i+1));
+        //for (int i = 0; i < this.WORKERS; i++)
+        //    ts[i].setName("Worker " + (i+1));
 
         for (int i = 0; i < this.WORKERS; i++)
             ts[i].start();
