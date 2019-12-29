@@ -102,7 +102,6 @@ public class ClientData implements Data
             this.pw.println(request.write());
 
             String in = this.br.readLine();
-            //Debug//System.out.println((in != null) ? in : "(null)");
             if(in == null)
                 throw new ConnectException();
 
@@ -115,8 +114,9 @@ public class ClientData implements Data
             final String file_path = "client_music/"+reply.getFileName();
             File file = new File(ClientInit.class.getResource("../").getPath() + file_path);
             // Create file if not exists
-            System.out.println("path : " + file.getPath());
-            System.out.println("File created : " + file.createNewFile());
+            //System.out.println("path : " + file.getPath());
+            //System.out.println("File created : " + file.createNewFile());
+            file.createNewFile();
 
             // Background Download
             new Thread(() ->
@@ -128,22 +128,18 @@ public class ClientData implements Data
                     long length = reply.getFileLength();
                     for(; length > 0 ; length -= count)
                     {
-                        System.out.println("length : " + length);
-                        System.out.println("Trying to write : " + ((MAX_SIZE > length) ? length : MAX_SIZE));
-
                         count = this.dis.read(bytes,0,(MAX_SIZE > length) ? (int) length : MAX_SIZE);
-                        System.out.println("Received: " + count + " bytes");
-
+                        //System.out.println("Received: " + count + " bytes");
                         fos.write(bytes,0,count);
                     }
-                    System.out.println("exited loop");
+                    //DEBUG//System.out.println("exited loop");
+                    System.out.print("Download Finished > ");
                 }
                 catch (IOException ioe)
                 {
-                    System.out.println("Connection error");
+                    ioe.printStackTrace();
                 }
             }).start();
-
 
             return new Music(reply.getName(), reply.getAuthor(), reply.getGenre(),
                     reply.getArtist(), file_path);
@@ -163,8 +159,6 @@ public class ClientData implements Data
             // This is just to get the file length
             File file = new File(ClientData.class.getResource("../").getPath() + "client_music/"+music.getFileName());
 
-            System.out.println(file.getPath());
-
             //Send request to upload with meta data already included
             Request request = new C2DRequest.Upload(music.getName(),
                     music.getAuthor(),music.getGenre(),music.getArtist(),
@@ -173,7 +167,6 @@ public class ClientData implements Data
 
 
             String in = this.br.readLine();
-            System.out.println("Received: " + in);
             if(in == null)
                 throw new ConnectException();
 
@@ -184,10 +177,8 @@ public class ClientData implements Data
 
 
             // Background Upload
-            System.out.println("Starting Background Upload");
             new Thread(() ->
             {
-                System.out.println("Inside Thread");
                 try(Socket upload_s = new Socket(SERVER_ADDRESS,reply.getPort()))
                 {
                     DataOutputStream upload_dos = new DataOutputStream(upload_s.getOutputStream());
@@ -197,11 +188,12 @@ public class ClientData implements Data
                         int count;
                         while((count = fis.read(bytes)) > 0)
                         {
-                            System.out.println("Sended:" + count + " bytes");
+                            //DEBUG//System.out.println("Sended:" + count + " bytes");
                             upload_dos.write(bytes,0,count);
                             upload_dos.flush(); //Not necessary in this context but good practice
                         }
                         //DEBUG//System.out.println("exited loop");
+                        System.out.print("Upload Finished > ");
                     }
                 }
                 catch (IOException ioe)
