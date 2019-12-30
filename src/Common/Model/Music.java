@@ -80,4 +80,9 @@ public class Music
     {
         ++this.downloads;
     }
+
+    public String authorAndName()
+    {
+        return this.author + " - " + this.name;
+    }
 }

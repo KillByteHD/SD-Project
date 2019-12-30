@@ -39,15 +39,8 @@ public class Worker extends Thread
             ConnectionMutex cm = tuple.fst();
             Request request = tuple.snd();
 
-
             // Which type of work is it?
-            if(request instanceof C2DRequest.Download)
-                download_work((C2DRequest.Download) request,cm);
-
-            else if(request instanceof C2DRequest.Upload)
-                upload_work((C2DRequest.Upload) request,cm);
-
-            else if(request instanceof C2DRequest.Login)
+            if(request instanceof C2DRequest.Login)
                 login_work((C2DRequest.Login) request,cm);
 
             else if(request instanceof C2DRequest.Logout)
@@ -55,6 +48,12 @@ public class Worker extends Thread
 
             else if(request instanceof C2DRequest.Register)
                 register_work((C2DRequest.Register) request,cm);
+
+            else if(request instanceof C2DRequest.Download)
+                download_work((C2DRequest.Download) request,cm);
+
+            else if(request instanceof C2DRequest.Upload)
+                upload_work((C2DRequest.Upload) request,cm);
         }
     }
 
@@ -190,6 +189,7 @@ public class Worker extends Thread
 
     private void upload_work(C2DRequest.Upload request, ConnectionMutex cm)
     {
+        //This upload work doesn't notify all connected users
         Reply reply = null;
 
         try

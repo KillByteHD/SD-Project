@@ -58,20 +58,23 @@ public class ServerInit
 
         Data data = new ServerData();
 
+        Notifier notifier = new Notifier();
+
         BoundedBuffer<Tuple<ConnectionMutex, Request>> buffer = new BoundedBuffer<>(SIZE_OTHER);
         BoundedBuffer<Tuple<ConnectionMutex, Request>> down_buffer = new BoundedBuffer<>(SIZE_DOWN);
         BoundedBuffer<Tuple<ConnectionMutex, Request>> up_buffer = new BoundedBuffer<>(SIZE_UP);
 
         WorkerPool pool = new WorkerPool(data,buffer,MAX_OTHER);
         WorkerPool download_pool = new WorkerPool(data,down_buffer,MAX_DOWN);
-        WorkerPool upload_pool = new WorkerPool(data,up_buffer,MAX_UP);
+        UploadPool upload_pool = new UploadPool(data,up_buffer,notifier,MAX_UP);
 
         pool.init();
         download_pool.init();
         upload_pool.init();
+        new Thread(notifier).start();
 
         while(true)
-            new ServerThread(ss.accept(),buffer,down_buffer,up_buffer)
+            new ServerThread(ss.accept(),buffer,down_buffer,up_buffer,notifier)
                     .start();
     }
 }

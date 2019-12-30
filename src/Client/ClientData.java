@@ -18,6 +18,7 @@ public class ClientData implements Data
     private final int CONNECT_DELAY = 3;
     private final int MAX_SIZE = 8*1024;
     private final String SERVER_ADDRESS = "localhost";
+    private final int SERVER_PORT = 1111;
 
     // Variables
     private Socket socket;
@@ -31,10 +32,29 @@ public class ClientData implements Data
         {
             try
             {
-                this.socket = new Socket(SERVER_ADDRESS,1111);
+                this.socket = new Socket(SERVER_ADDRESS,SERVER_PORT);
                 this.br = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
                 this.pw = new PrintWriter(this.socket.getOutputStream(),true);
                 this.dis = new DataInputStream(this.socket.getInputStream());
+
+                new Thread(() ->
+                {
+                    try
+                    {
+                        Socket s = new Socket(SERVER_ADDRESS,Integer.parseInt(this.br.readLine()));
+                        BufferedReader notif_br = new BufferedReader(new InputStreamReader(s.getInputStream()));
+
+                        while(!s.isClosed())
+                        {
+                            System.out.print(notif_br.readLine() + "\n> ");
+                        }
+                    }
+                    catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
+                }).start();
+
                 break;
             }
             catch (IOException e)
@@ -219,7 +239,7 @@ public class ClientData implements Data
                             upload_dos.flush(); //Not necessary in this context but good practice
                         }
                         //DEBUG//System.out.println("exited loop");
-                        System.out.print("[ Upload Finished ]\n> ");
+
                     }
                 }
                 catch (IOException ioe)

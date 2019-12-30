@@ -7,6 +7,7 @@ import Common.Protocol.Request;
 import Server.Utils.Tuple;
 
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.net.Socket;
 
 public class ServerThread extends Thread
@@ -20,15 +21,31 @@ public class ServerThread extends Thread
     public ServerThread(Socket socket,
                         BoundedBuffer<Tuple<ConnectionMutex, Request>> buffer,
                         BoundedBuffer<Tuple<ConnectionMutex, Request>> down_buffer,
-                        BoundedBuffer<Tuple<ConnectionMutex, Request>> up_buffer)
+                        BoundedBuffer<Tuple<ConnectionMutex, Request>> up_buffer,
+                        Notifier notifier)
     {
         this.cm = new ConnectionMutex(socket);
         this.buffer = buffer;
         this.down_buffer = down_buffer;
         this.up_buffer = up_buffer;
         Logger.connected(this.cm.getSocket());
+
+        try
+        {
+            ServerSocket notif_ss = new ServerSocket(0);
+
+            this.cm.println(String.valueOf(notif_ss.getLocalPort()));
+
+            notifier.add(notif_ss.accept());
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
     }
 
+    @Override
     public void run()
     {
         while(!this.cm.isClosed())
@@ -58,7 +75,6 @@ public class ServerThread extends Thread
 
         try
         {
-
             this.cm.close();
             Logger.disconnected(this.cm.getSocket());
         }

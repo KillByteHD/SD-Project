@@ -4,6 +4,7 @@ import Common.Model.Data;
 
 public class ClientInit
 {
+
     public static void main(String[] args)
     {
         View view = new View();
