@@ -16,11 +16,11 @@ necessidade de todos os utilizadores obterem ficheiros.
 
 #### Notificação de novas músicas:
 
-- [ ] Durante o período em que um cliente está ligado ao servidor, deve receber notificações de novas músicas que sejam carregadas.
+- [x] Durante o período em que um cliente está ligado ao servidor, deve receber notificações de novas músicas que sejam carregadas.
 
-- [ ] Cada notificação deve conter o título e autor da música.
+- [x] Cada notificação deve conter o título e autor da música.
 
-- [ ] Deve ser possível continuar a receber e mostrar notificações mesmo durante outras operações
+- [x] Deve ser possível continuar a receber e mostrar notificações mesmo durante outras operações
 demoradas de carga ou descarga de ficheiros.
 
 #### Tamanho dos ficheiros ilimitado:

@@ -197,7 +197,6 @@ public class ClientData implements Data
     @Override
     public void upload(String auth, Music music) throws Unauthorized, MusicAlreadyExists, ConnectException
     {
-
         try
         {
             // This is just to get the file length
