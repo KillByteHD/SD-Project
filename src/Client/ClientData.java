@@ -10,6 +10,7 @@ import Common.Protocol.Request;
 import java.io.*;
 import java.net.ConnectException;
 import java.net.Socket;
+import java.util.List;
 
 // TODO: Consider adding ClassCastException
 public class ClientData implements Data
@@ -195,7 +196,7 @@ public class ClientData implements Data
     }
 
     @Override
-    public void upload(String auth, Music music) throws Unauthorized, MusicAlreadyExists, ConnectException
+    public void upload(String auth, Music music, List<String> tags) throws Unauthorized, MusicAlreadyExists, ConnectException
     {
         try
         {
@@ -203,9 +204,13 @@ public class ClientData implements Data
             File file = new File(ClientData.class.getResource("../").getPath() + "client_music/"+music.getFileName());
 
             //Send request to upload with meta data already included
-            Request request = new C2DRequest.Upload(auth,music.getName(),
+            C2DRequest.Upload request = new C2DRequest.Upload(auth,music.getName(),
                     music.getAuthor(),music.getGenre(),music.getArtist(),
                     music.getFileName(),file.length());
+
+            for(String tag : tags)
+                request.addTag(tag);
+
             this.pw.println(request.write());
 
 
@@ -246,6 +251,32 @@ public class ClientData implements Data
                     ioe.printStackTrace();
                 }
             }).start();
+        }
+        catch (IOException | ProtocolParseError e)
+        {
+            throw new ConnectException();
+        }
+    }
+
+    @Override
+    public List<Music> search(String auth, String tag) throws Unauthorized, NothingFound, ConnectException
+    {
+        try
+        {
+            Request request = new C2DRequest.Search(auth,tag);
+            this.pw.println(request.write());
+
+            String in = this.br.readLine();
+            if(in == null)
+                throw new ConnectException();
+
+            C2DReply.Search reply = (C2DReply.Search) C2DReply.parse(in);
+            if(reply.getStatus() == ExceptionCode.NothingFound)
+                throw new NothingFound();
+            else if(reply.getStatus() == ExceptionCode.Unauthorized)
+                throw new Unauthorized();
+
+            return reply.getResult();
         }
         catch (IOException | ProtocolParseError e)
         {

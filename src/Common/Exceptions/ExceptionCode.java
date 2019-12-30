@@ -9,5 +9,6 @@ public enum ExceptionCode
     InvalidMusic,
     MusicAlreadyExists,
     Unauthorized,
-    NotLoggedIn
+    NotLoggedIn,
+    NothingFound
 }

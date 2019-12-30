@@ -29,3 +29,17 @@ demoradas de carga ou descarga de ficheiros.
 memória.
 
 - [x] Pelo contrário, deve garantir que a transferência de cada ficheiro nunca ocupa mais do que MAXSIZE bytes em memória, tanto do cliente como do servidor
+
+### TODO
+
+- Meter C2DRequest abstract
+
+- Criar interfaces para todos os tipos de Requests e Replys
+
+### NOTAS
+
+Em Music metodos que apenas lêem atributos dessa class nao precisam de lock pois os campos sao 
+construidos 1 vez apenas e nao podem ser alterados , nao havendo necessidade de synchronized em
+metodos como por exemplo `authorAndName()` ou getters
+
+Quando estao a ser dadas tags ao upload não se pode dar a tag "(none)" por causa da estrutura do protocologo

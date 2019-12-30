@@ -3,6 +3,10 @@ package Common.Protocol;
 import Common.Exceptions.ExceptionCode;
 import Common.Exceptions.ProtocolParseError;
 import Common.Model.Genre;
+import Common.Model.Music;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class C2DReply
 {
@@ -189,6 +193,56 @@ public class C2DReply
         }
     }
 
+    public static class Search implements Reply
+    {
+        private ExceptionCode status;
+        private List<Music> result;
+
+        public Search(List<Music> result)
+        {
+            this.result = result;
+            this.status = null;
+        }
+        public Search(ExceptionCode code)
+        {
+            this.status = code;
+        }
+
+        public ExceptionCode getStatus()
+        {
+            return status;
+        }
+        public List<Music> getResult()
+        {
+            return result;
+        }
+
+        @Override
+        public String write()
+        {
+            if(this.status == null)
+            {
+                StringBuilder sb = new StringBuilder("found:");
+                final int length = this.result.size();
+
+                for(int i = 0 ; i < length ; i++)
+                {
+                    Music m = this.result.get(i);
+                    sb.append(m.getName()).append('|');
+                    sb.append(m.getAuthor()).append('|');
+                    sb.append(m.getGenre().ordinal()).append('|');
+                    sb.append(m.getArtist()).append('|');
+                    sb.append(m.getDownloads());
+                    if(i < length-1)
+                        sb.append(':');
+                }
+
+                return sb.toString();
+            }
+            else
+                return "s_err:"+this.status.ordinal();
+        }
+    }
 
     public static Reply parse(String str) throws ProtocolParseError
     {
@@ -208,6 +262,8 @@ public class C2DReply
                     return new C2DReply.Download(ExceptionCode.values()[Integer.parseInt(args[1])]);
                 case "u_err":
                     return new C2DReply.Upload(ExceptionCode.values()[Integer.parseInt(args[1])]);
+                case "s_err":
+                    return new C2DReply.Search(ExceptionCode.values()[Integer.parseInt(args[1])]);
                 // Match a success
                 case "logged":
                     return new C2DReply.Login(args[1]);
@@ -220,6 +276,20 @@ public class C2DReply
                             args[4],args[5],Long.parseLong(args[6]));
                 case "uploaded":
                     return new C2DReply.Upload(Integer.parseInt(args[1]));
+                case "found":
+                    List<Music> result = new ArrayList<>(args.length-1);
+                    for(int i = 1 ; i < args.length ; i++)
+                    {
+                        String[] str_music = args[i].split("\\|");
+                        result.add(new Music(str_music[0],
+                                str_music[1],
+                                Genre.values()[Integer.parseInt(str_music[2])],
+                                str_music[3],
+                                "(hidden)",
+                                Integer.parseInt(str_music[4])));
+                    }
+                    //path (hidden)
+                    return new C2DReply.Search(result);
             }
         }
         catch (Exception e) { }

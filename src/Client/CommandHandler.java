@@ -7,6 +7,8 @@ import Common.Model.Music;
 
 import java.lang.reflect.Method;
 import java.net.ConnectException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class CommandHandler
@@ -52,6 +54,9 @@ public class CommandHandler
                         break;
                     case "upload":
                         upload(args);
+                        break;
+                    case "search":
+                        search(args);
                         break;
                     case "help":
                         help(args);
@@ -166,8 +171,22 @@ public class CommandHandler
             String artist = args[4];
             String file_name = args[5];
 
+            List<String> tags = new ArrayList<>();
+
+            String tag;
+            while(true)
+            {
+                tag = this.view.get_field("Tag");
+
+                if(tag.equals(""))
+                    break;
+                else
+                    tags.add(tag);
+            }
+
+
             Music m = new Music(name,author,genre,artist,file_name);
-            this.data.upload(this.auth,m);
+            this.data.upload(this.auth,m,tags);
             //System.out.println("Correct " + genre.ordinal() + " " + genre.toString());
         }
         catch (Unauthorized u)
@@ -185,6 +204,41 @@ public class CommandHandler
         catch (MusicAlreadyExists mae)
         {
             this.view.error("Music Already Exists");
+        }
+    }
+
+    @Command(name = "search", description = "Search for a music with a tag", args = {"tag"})
+    public void search(String[] args) throws ConnectException
+    {
+        try
+        {
+            String tag = args[1];
+
+            List<Music> res = this.data.search(this.auth,tag);
+
+            StringBuilder sb = new StringBuilder();
+            for(Music m : res)
+            {
+                sb.append(m.getID()).append(" | ")
+                        .append(m.authorAndName())
+                        .append(" Downloaded : ")
+                        .append(m.getDownloads())
+                        .append(" Times").append('\n');
+            }
+            this.view.list_search(tag,sb.toString());
+        }
+        catch (Unauthorized u)
+        {
+            this.view.error("Unauthorized please log in");
+        }
+        catch (IndexOutOfBoundsException ioobe)
+        {
+            this.view.error("Invalid Number of Arguments");
+        }
+        catch (NothingFound mae)
+        {
+            this.view.println(" - Empty -");
+            //this.view.error("Empty");
         }
     }
 

@@ -1,6 +1,5 @@
 package Server;
 
-import Client.ClientInit;
 import Common.Exceptions.*;
 import Common.Model.Data;
 import Common.Model.Music;
@@ -14,6 +13,7 @@ import java.io.*;
 import java.net.ConnectException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
 
 public class Worker extends Thread
 {
@@ -54,6 +54,9 @@ public class Worker extends Thread
 
             else if(request instanceof C2DRequest.Upload)
                 upload_work((C2DRequest.Upload) request,cm);
+
+            else if(request instanceof C2DRequest.Search)
+                search_work((C2DRequest.Search) request,cm);
         }
     }
 
@@ -197,7 +200,7 @@ public class Worker extends Thread
             Music m = new Music(request.getName(),request.getAuthor(),
                     request.getGenre(),request.getArtist(),
                     "server_music/" + request.getFileName());
-            this.data.upload(request.getAuth(),m);
+            this.data.upload(request.getAuth(),m,request.getTags());
 
 
             // Send upload confirmation and port to create secure socket (preparing to upload file)
@@ -254,6 +257,31 @@ public class Worker extends Thread
         catch (IOException ioe)
         {
             ioe.printStackTrace();
+        }
+    }
+
+    private void search_work(C2DRequest.Search request, ConnectionMutex cm)
+    {
+        Reply reply = null;
+
+        try
+        {
+            List<Music> res = this.data.search(request.getAuth(),request.getTag());
+            reply = new C2DReply.Search(res);
+        }
+        catch (Unauthorized | NothingFound nf)
+        {
+            reply = new C2DReply.Search(nf.getCode());
+        }
+        catch (ConnectException ce)
+        {
+            // Nao seria possivel acontecer nesta implementacao
+            reply = new C2DReply.Search(ExceptionCode.ServerError);
+        }
+        finally
+        {
+            cm.println(reply.write());
+            Logger.sended(cm.getSocket(),reply.write());
         }
     }
 

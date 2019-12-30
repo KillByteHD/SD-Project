@@ -61,7 +61,7 @@ public class UploadWorker extends Thread
             Music m = new Music(request.getName(),request.getAuthor(),
                     request.getGenre(),request.getArtist(),
                     "server_music/" + request.getFileName());
-            this.data.upload(request.getAuth(),m);
+            this.data.upload(request.getAuth(),m,request.getTags());
 
 
             // Send upload confirmation and port to create secure socket (preparing to upload file)

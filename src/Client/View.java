@@ -60,4 +60,16 @@ public class View
         System.out.println(help);
         System.out.println(" ============================== ");
     }
+
+    public void list_search(String tag, String musics)
+    {
+        System.out.println(" ========== [ SEARCH : " + tag + " ] ========== ");
+        System.out.print(musics);
+
+        // Adjust down bar size to match tag length
+        String bar_size = "";
+        for(int i = 0 ; i < tag.length() ; i++)
+            bar_size += "=";
+        System.out.println(" ===================================" + bar_size);
+    }
 }

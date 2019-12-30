@@ -1,6 +1,8 @@
 package Common.Model;
 
 import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class Music
 {
@@ -11,6 +13,8 @@ public class Music
     private String file_path;
     private int downloads;
 
+    private Set<String> tags;
+
 
     public Music(String name, String author, Genre genre, String artist, String file_path)
     {
@@ -20,6 +24,20 @@ public class Music
         this.artist = artist;
         this.file_path = file_path;
         this.downloads = 0;
+
+        this.tags = new TreeSet<>();
+    }
+
+    public Music(String name, String author, Genre genre, String artist, String file_path, int downloads)
+    {
+        this.name = name;
+        this.author = author;
+        this.genre = genre;
+        this.artist = artist;
+        this.file_path = file_path;
+        this.downloads = downloads;
+
+        this.tags = new TreeSet<>();
     }
 
 
@@ -47,6 +65,10 @@ public class Music
     {
         String[] tmp = this.file_path.split("/");
         return tmp[tmp.length-1];
+    }
+    public int getDownloads()
+    {
+        return downloads;
     }
 
 
@@ -84,5 +106,15 @@ public class Music
     public String authorAndName()
     {
         return this.author + " - " + this.name;
+    }
+
+    public synchronized void addTag(String tag)
+    {
+        this.tags.add(tag);
+    }
+
+    public synchronized boolean hasTag(String tag)
+    {
+        return this.tags.contains(tag);
     }
 }

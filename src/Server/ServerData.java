@@ -3,7 +3,10 @@ package Server;
 import Common.Exceptions.*;
 import Common.Model.*;
 
+import java.net.ConnectException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ServerData implements Data
@@ -95,7 +98,7 @@ public class ServerData implements Data
     }
 
     @Override
-    public synchronized void upload(String auth, Music music) throws MusicAlreadyExists, Unauthorized
+    public synchronized void upload(String auth, Music music, List<String> tags) throws MusicAlreadyExists, Unauthorized
     {
         if(!this.session_cache.contains(auth))
             throw new Unauthorized();
@@ -105,9 +108,34 @@ public class ServerData implements Data
             if(tmp != null)
                 throw new MusicAlreadyExists();
 
+            for(String tag : tags)
+                music.addTag(tag);
+            music.addTag("all");
+
             this.musics.put(music.getID(),music);
         }
         catch(NullPointerException | ClassCastException cce)
         { throw new MusicAlreadyExists(); }
+    }
+
+    @Override
+    public synchronized List<Music> search(String auth, String tag) throws NothingFound, Unauthorized
+    {
+        if(!this.session_cache.contains(auth))
+            throw new Unauthorized();
+
+        List<Music> res = new ArrayList<>();
+
+        for(Music m : this.musics.values())
+        {
+            if(m.hasTag(tag))
+                res.add(m);
+
+        }
+
+        if(res.size() == 0)
+            throw new NothingFound();
+        else
+            return res;
     }
 }
