@@ -5,6 +5,7 @@ import Common.Model.Data;
 import Common.Model.Genre;
 import Common.Model.Music;
 
+import java.io.File;
 import java.lang.reflect.Method;
 import java.net.ConnectException;
 import java.util.ArrayList;
@@ -170,6 +171,13 @@ public class CommandHandler
             Genre genre = Genre.valueOf(args[3]);
             String artist = args[4];
             String file_name = args[5];
+
+            File file = new File(ClientData.class.getResource("../").getPath() + "client_music/"+file_name);
+            if(!file.exists())
+            {
+                this.view.error("File doesn't exists");
+                return;
+            }
 
             List<String> tags = new ArrayList<>();
 
