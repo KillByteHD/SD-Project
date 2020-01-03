@@ -2,55 +2,27 @@ package Server;
 
 import Common.Model.Data;
 import Common.Protocol.Request;
+import Server.Controller.*;
+import Server.Controller.ThreadPools.UploadPool;
+import Server.Controller.ThreadPools.WorkerPool;
+import Server.Model.ServerData;
 import Server.Utils.Tuple;
+import Server.View.Logger;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Properties;
+import static Server.Controller.Config.*;
 
 public class ServerInit
 {
-    // Server Constraints
-    public static int SIZE_DOWN;
-    public static int SIZE_UP;
-    public static int SIZE_OTHER;
-    public static int MAX_DOWN;
-    public static int MAX_UP;
-    public static int MAX_OTHER;
-    public static int PORT;
-
-    public static final String SERVER_PATH = ServerInit.class.getResource("./").getPath();
-
+    public static final String SERVER_PATH = ServerInit.class.getResource("../").getPath();
 
     public static void main(String[] args) throws Exception
     {
         // Load Server Configuration
-        try (FileInputStream input = new FileInputStream(SERVER_PATH + "config.properties"))
-        {
-            Properties properties = new Properties();
-            // load config file
-            properties.load(input);
-
-            SIZE_DOWN = Integer.parseInt(properties.getProperty("size_down"));
-            SIZE_UP = Integer.parseInt(properties.getProperty("size_up"));
-            SIZE_OTHER = Integer.parseInt(properties.getProperty("size_other"));
-            MAX_DOWN = Integer.parseInt(properties.getProperty("max_down"));
-            MAX_UP = Integer.parseInt(properties.getProperty("max_up"));
-            MAX_OTHER = Integer.parseInt(properties.getProperty("max_other"));
-            PORT = Integer.parseInt(properties.getProperty("port"));
-        }
-        catch (IOException | NumberFormatException ex)
-        {
-            // Assign default values
-            SIZE_DOWN = 10;
-            SIZE_UP = 10;
-            SIZE_OTHER = 10;
-            MAX_DOWN = 5;
-            MAX_UP = 5;
-            MAX_OTHER = 5;
-            PORT = 1111;
-        }
+        Config.loadConfig();
 
         // Start Server
         ServerSocket ss = new ServerSocket(PORT);

@@ -1,4 +1,4 @@
-package Server;
+package Server.Controller;
 
 import Common.Model.Music;
 import Server.Utils.Tuple;

@@ -1,15 +1,18 @@
-package Server;
+package Server.Controller.ThreadPools;
 
 import Common.Exceptions.ExceptionCode;
 import Common.Exceptions.MusicAlreadyExists;
 import Common.Exceptions.Unauthorized;
 import Common.Model.Data;
 import Common.Model.Music;
-import Common.Protocol.C2DReply;
-import Common.Protocol.C2DRequest;
-import Common.Protocol.Reply;
-import Common.Protocol.Request;
+import Common.Protocol.*;
+import Server.Controller.BoundedBuffer;
+import Server.Controller.ConnectionMutex;
+import Server.Controller.Notifier;
+import Server.ServerInit;
 import Server.Utils.Tuple;
+import Server.View.Logger;
+import static Server.Controller.Config.*;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -21,8 +24,6 @@ import java.net.Socket;
 
 public class UploadWorker extends Thread
 {
-    private final int MAX_SIZE = 8*1024;
-
     private BoundedBuffer<Tuple<ConnectionMutex, Request>> bb;
     private Data data;
     private Notifier notifier;
@@ -75,7 +76,7 @@ public class UploadWorker extends Thread
 
             try(Socket upload_s = upload_ss.accept())
             {
-                File file = new File(Worker.class.getResource("../").getPath() + m.getFilePath());
+                File file = new File(ServerInit.SERVER_PATH + m.getFilePath());
                 // Create file if not exists
                 file.createNewFile();
 
@@ -102,7 +103,6 @@ public class UploadWorker extends Thread
                     ioe.printStackTrace();
                 }
             }
-
         }
         catch (Unauthorized | MusicAlreadyExists mae)
         {

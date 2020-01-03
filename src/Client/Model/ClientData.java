@@ -1,5 +1,6 @@
-package Client;
+package Client.Model;
 
+import Client.ClientInit;
 import Common.Exceptions.*;
 import Common.Model.Music;
 import Common.Protocol.C2DReply;
@@ -20,6 +21,7 @@ public class ClientData implements Data
     private final int MAX_SIZE = 8*1024;
     private final String SERVER_ADDRESS = "localhost";
     private final int SERVER_PORT = 1111;
+
 
     // Variables
     private Socket socket;
@@ -157,7 +159,7 @@ public class ClientData implements Data
 
             // Receive file bytes
             final String file_path = "client_music/"+reply.getFileName();
-            File file = new File(ClientInit.class.getResource("../").getPath() + file_path);
+            File file = new File(ClientInit.CLIENT_PATH + file_path);
             // Create file if not exists
             //System.out.println("path : " + file.getPath());
             //System.out.println("File created : " + file.createNewFile());
@@ -201,7 +203,8 @@ public class ClientData implements Data
         try
         {
             // This is just to get the file length
-            File file = new File(ClientData.class.getResource("../").getPath() + "client_music/"+music.getFileName());
+            File file = new File(ClientInit.CLIENT_PATH + "client_music/"+music.getFileName());
+            System.out.println(ClientInit.CLIENT_PATH + "client_music/"+music.getFileName());
 
             //Send request to upload with meta data already included
             C2DRequest.Upload request = new C2DRequest.Upload(auth,music.getName(),

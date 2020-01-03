@@ -1,4 +1,4 @@
-package Client;
+package Client.View;
 
 import java.util.Scanner;
 
@@ -14,6 +14,15 @@ public class View
 
     public void welcome()
     {
+        final String logo =
+                "                    _ _         _           _     \n" +
+                "     /\\            | (_)       | |         | |    \n" +
+                "    /  \\  _   _  __| |_  ___   | |     __ _| |__  \n" +
+                "   / /\\ \\| | | |/ _` | |/ _ \\  | |    / _` | '_ \\ \n" +
+                "  / ____ \\ |_| | (_| | | (_) | | |___| (_| | |_) |\n" +
+                " /_/    \\_\\__,_|\\__,_|_|\\___/  |______\\__,_|_.__/ \n" +
+                "                                                  ";
+        System.out.println(logo);
         System.out.println(" - Welcome - Enter 'help' to list all commands - ");
     }
 

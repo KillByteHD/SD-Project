@@ -1,18 +1,21 @@
-package Server;
+package Server.Controller.ThreadPools;
 
 import Common.Model.Data;
 import Common.Protocol.Request;
+import Server.Controller.BoundedBuffer;
+import Server.Controller.ConnectionMutex;
 import Server.Utils.Tuple;
 
+//Used as generic work pool
 public class WorkerPool
 {
     // Constraints
-    private final int WORKERS;
+    protected final int WORKERS;
 
     // Varibles
-    private Thread[] ts;
-    private BoundedBuffer<Tuple<ConnectionMutex, Request>> buffer;
-    private Data data;
+    protected Thread[] ts;
+    protected BoundedBuffer<Tuple<ConnectionMutex, Request>> buffer;
+    protected Data data;
 
     public WorkerPool(Data data, BoundedBuffer<Tuple<ConnectionMutex, Request>> bb, int workers)
     {

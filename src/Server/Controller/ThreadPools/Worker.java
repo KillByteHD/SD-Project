@@ -1,5 +1,6 @@
-package Server;
+package Server.Controller.ThreadPools;
 
+import Client.ClientInit;
 import Common.Exceptions.*;
 import Common.Model.Data;
 import Common.Model.Music;
@@ -7,7 +8,12 @@ import Common.Protocol.C2DReply;
 import Common.Protocol.C2DRequest;
 import Common.Protocol.Reply;
 import Common.Protocol.Request;
+import Server.Controller.BoundedBuffer;
+import Server.Controller.ConnectionMutex;
+import Server.ServerInit;
 import Server.Utils.Tuple;
+import Server.View.Logger;
+import static Server.Controller.Config.*;
 
 import java.io.*;
 import java.net.ConnectException;
@@ -17,8 +23,6 @@ import java.util.List;
 
 public class Worker extends Thread
 {
-    private final int MAX_SIZE = 8*1024;
-
     private BoundedBuffer<Tuple<ConnectionMutex, Request>> bb;
     private Data data;
 
@@ -146,7 +150,7 @@ public class Worker extends Thread
             //Debug//System.out.println("Music : " + m.getName());
 
             // See file length
-            File file = new File(Worker.class.getResource("../").getPath() + m.getFilePath());
+            File file = new File(ServerInit.SERVER_PATH + m.getFilePath());
             long length = file.length();
             //Debug//System.out.println("File size: " + length);
             reply = new C2DReply.Download(m.getName(),m.getAuthor(),m.getGenre(),m.getArtist(),m.getFileName(),length);
@@ -214,7 +218,7 @@ public class Worker extends Thread
 
             try(Socket upload_s = upload_ss.accept())
             {
-                File file = new File(Worker.class.getResource("../").getPath() + m.getFilePath());
+                File file = new File(ServerInit.SERVER_PATH + m.getFilePath());
                 // Create file if not exists
                 file.createNewFile();
 

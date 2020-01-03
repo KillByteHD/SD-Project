@@ -1,33 +1,28 @@
-package Server;
+package Server.Controller.ThreadPools;
 
 import Common.Model.Data;
 import Common.Protocol.Request;
+import Server.Controller.BoundedBuffer;
+import Server.Controller.ConnectionMutex;
+import Server.Controller.Notifier;
 import Server.Utils.Tuple;
 
-public class UploadPool
+public class UploadPool extends WorkerPool
 {
-    // Constraints
-    private final int WORKERS;
-
     // Varibles
-    private Thread[] ts;
-    private BoundedBuffer<Tuple<ConnectionMutex, Request>> buffer;
-    private Data data;
     private Notifier notifier;
 
     public UploadPool(Data data, BoundedBuffer<Tuple<ConnectionMutex, Request>> bb, Notifier notifier, int workers)
     {
-        this.WORKERS = workers;
-        this.ts = new Thread[this.WORKERS];
-        this.buffer = bb;
-        this.data = data;
+        super(data,bb,workers);
         this.notifier = notifier;
     }
 
+    @Override
     public void init()
     {
-        for (int i = 0; i < this.WORKERS; i++)
-            ts[i] = new UploadWorker(this.buffer,this.data,this.notifier);
+        for (int i = 0; i < super.WORKERS; i++)
+            ts[i] = new UploadWorker(super.buffer,super.data,this.notifier);
 
         //for (int i = 0; i < this.WORKERS; i++)
         //    ts[i].setName("Uploader " + (i+1));

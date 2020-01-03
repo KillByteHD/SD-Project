@@ -2,7 +2,6 @@ package Common.Model;
 
 public enum Genre
 {
-
     AFRO,
     ALTERNATIVE_ROCK,
     AVANT_GARDE,

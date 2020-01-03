@@ -1,5 +1,8 @@
-package Client;
+package Client.Controller;
 
+import Client.ClientInit;
+import Client.Model.ClientData;
+import Client.View.View;
 import Common.Exceptions.*;
 import Common.Model.Data;
 import Common.Model.Genre;
@@ -65,6 +68,8 @@ public class CommandHandler
                     case "exit":
                         exit();
                         break;
+                    case "":
+                        break;
                     default:
                         this.view.unknown_command();
                         break;
@@ -77,6 +82,7 @@ public class CommandHandler
             }
         }
     }
+
 
     @Command(name = "login", description = "Login Process")
     public void login() throws ConnectException
@@ -94,6 +100,7 @@ public class CommandHandler
             this.view.error("Invalid Login / Please try again");
         }
     }
+
 
     @Command(name = "logout", description = "Logout Process")
     public void logout() throws ConnectException
@@ -113,8 +120,9 @@ public class CommandHandler
             this.view.error("Unable to Logout");
     }
 
-    @Command(name = "register", description = "Register a new User"/*, args = {"username" , "password", "confirm_password"}*/)
-    public void register(/*String[] args*/) throws ConnectException
+
+    @Command(name = "register", description = "Register a new User")
+    public void register() throws ConnectException
     {
         String username = this.view.get_field("Username");
         String password = this.view.get_field("Password");
@@ -152,11 +160,11 @@ public class CommandHandler
         }
         catch (IndexOutOfBoundsException ioobe)
         {
-            this.view.error("Invalid Arguments");
+            this.view.error("Invalid Number of Arguments");
         }
         catch (InvalidMusic invalidMusic)
         {
-            this.view.error("Invalid Number of Arguments");
+            this.view.error("Invalid Music ID");
         }
     }
 
@@ -172,7 +180,7 @@ public class CommandHandler
             String artist = args[4];
             String file_name = args[5];
 
-            File file = new File(ClientData.class.getResource("../").getPath() + "client_music/"+file_name);
+            File file = new File(ClientInit.CLIENT_PATH + "client_music/"+file_name);
             if(!file.exists())
             {
                 this.view.error("File doesn't exists");
@@ -215,7 +223,8 @@ public class CommandHandler
         }
     }
 
-    @Command(name = "search", description = "Search for a music with a tag", args = {"tag"})
+
+    @Command(name = "search", description = "Search for a music with a tag (search all - for all musics)", args = {"tag"})
     public void search(String[] args) throws ConnectException
     {
         try
@@ -250,12 +259,13 @@ public class CommandHandler
         }
     }
 
+
     @Command(name = "help", description = "Help Command", args = {"command"})
     public void help(String[] args)
     {
         String command = null;
         try { command = args[1]; }
-        catch (Exception e) { }
+        catch (Exception ignored) { }
 
         if(command == null)
         {
@@ -272,8 +282,8 @@ public class CommandHandler
                     String[] cmd_agrs = c.args();
 
                     help.append(" ").append(c.name());
-                    for(String argi : cmd_agrs)
-                        help.append(" [").append(argi).append("]");
+                    //for(String argi : cmd_agrs)
+                    //    help.append(" [").append(argi).append("]");
                     help.append(" - ").append(c.description());
                 }
             }
@@ -284,7 +294,16 @@ public class CommandHandler
         {
             try
             {
-                Method m = CommandHandler.class.getMethod(command);
+                Method m ;
+                try
+                {
+                    m = CommandHandler.class.getMethod(command,null);
+                }
+                catch (NoSuchMethodException ignored)
+                {
+                    m = CommandHandler.class.getMethod(command,String[].class);
+                }
+
                 StringBuilder help = new StringBuilder();
                 Command c = m.getAnnotation(Command.class);
                 if(c != null)
@@ -301,7 +320,8 @@ public class CommandHandler
 
                     this.view.help_block(help.toString());
                 }
-
+                else
+                    this.view.invalid_arguments();
             }
             catch (NoSuchMethodException e)
             { this.view.invalid_arguments(); }
@@ -312,6 +332,11 @@ public class CommandHandler
     @Command(name = "exit", description = "Exits Program")
     public void exit()
     {
+        try
+        { logout(); }
+        catch (ConnectException ce)
+        { this.view.error("Unable to Logout"); }
+
         System.exit(0);
     }
 }

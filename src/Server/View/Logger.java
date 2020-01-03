@@ -1,4 +1,4 @@
-package Server;
+package Server.View;
 
 import java.net.Socket;
 import java.time.LocalTime;
@@ -6,11 +6,7 @@ import java.time.format.DateTimeFormatter;
 
 public class Logger
 {
-
-    public Logger()
-    {
-
-    }
+    // Static logger for server message logs
 
     private static String time()
     {

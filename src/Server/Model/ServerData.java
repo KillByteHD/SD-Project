@@ -1,9 +1,8 @@
-package Server;
+package Server.Model;
 
 import Common.Exceptions.*;
 import Common.Model.*;
 
-import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
