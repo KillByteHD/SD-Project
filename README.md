@@ -11,7 +11,7 @@ Distributed Systems project instance
 
 - [x] Pedidos de descarga que ultrapassem o limite devem esperar até obterem vez.
 
-- [ ] Em caso de espera, deve ser estabelecida uma política que combine a ordem de chegada com a
+- [x] Em caso de espera, deve ser estabelecida uma política que combine a ordem de chegada com a
 necessidade de todos os utilizadores obterem ficheiros.
 
 #### Notificação de novas músicas:
@@ -28,7 +28,7 @@ demoradas de carga ou descarga de ficheiros.
 - [x] A solução apresentada não deve assumir que cada ficheiro de música cabe completamente em
 memória.
 
-- [x] Pelo contrário, deve garantir que a transferência de cada ficheiro nunca ocupa mais do que MAXSIZE bytes em memória, tanto do cliente como do servidor
+- [x] Pelo contrário, deve garantir que a transferência de cada ficheiro nunca ocupa mais do que MAX_SIZE bytes em memória, tanto do cliente como do servidor
 
 ### TODO
 
@@ -49,6 +49,5 @@ Quando estao a ser dadas tags ao upload não se pode dar a tag "(none)" por caus
 Quando é feito um upload ... a tag all é adicionada automaticamente para se poder procurar por todas as musicas com
 o comando search all
 
-Formatar melhor a apresentação do search
 
-Tentar meter tudo organizado em pastas MVC
+Formatar melhor a apresentação do search
