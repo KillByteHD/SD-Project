@@ -23,13 +23,14 @@ public class ServerData implements Data
 
         //Temporary Populate
         this.users.put("root",new User("root","root"));
-        /*Music m1 = new Music("hello world","bytes", Genre.COMEDY,"computer","server_music/hello_world.mp3");
-        Music m2 = new Music("Demons","joji", Genre.UNDEFINED,"joji","server_music/Demons.mp3");
+        Music m1 = new Music("hello world","bytes", Genre.COMEDY,"computer","server_music/hello_world.mp3");
+        this.musics.put(m1.getID(),m1);
+        /*Music m2 = new Music("Demons","joji", Genre.UNDEFINED,"joji","server_music/Demons.mp3");
         Music m3 = new Music("tmp","tmp", Genre.UNDEFINED,"tmp","server_music/tmp.txt");
         System.out.println("hello_world ID: " + m1.getID());
         System.out.println("Demons ID: " + m2.getID());
         System.out.println("tmp ID: " + m3.getID());
-        this.musics.put(m1.getID(),m1);
+
         this.musics.put(m2.getID(),m2);
         this.musics.put(m3.getID(),m3);*/
     }

@@ -96,6 +96,7 @@ public class UploadWorker extends Thread
                         fos.write(bytes,0,count);
                         //fos.flush(); // Flush not necessary because we are in a try-with-resources clause (fos will be closed and flushed)
                     }
+                    System.out.println(m.authorAndName() + " got fully uploaded");
                     this.notifier.put(m);
                 }
                 catch (IOException ioe)

@@ -46,8 +46,4 @@ metodos como por exemplo `authorAndName()` ou getters
 Quando estao a ser dadas tags ao upload não se pode dar a tag "(none)" por causa da estrutura do protocologo
 
 
-Quando é feito um upload ... a tag all é adicionada automaticamente para se poder procurar por todas as musicas com
-o comando search all
-
-
 Formatar melhor a apresentação do search

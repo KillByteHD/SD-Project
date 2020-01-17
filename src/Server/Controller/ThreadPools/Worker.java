@@ -169,10 +169,12 @@ public class Worker extends Thread
                 cm.lock();
                 while((count = fis.read(bytes)) > 0)
                 {
-                    //Debug//System.out.println("Sended:" + count + " bytes");
+                    //Debug//
+                    System.out.println("Sended:" + count + " bytes");
                     cm.write(bytes,count);
                 }
                 cm.unlock();
+                System.out.println(m.authorAndName() + " got fully downloaded");
             }
             catch (IOException ioe)
             {
