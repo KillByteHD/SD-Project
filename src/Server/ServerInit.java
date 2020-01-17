@@ -9,10 +9,7 @@ import Server.Model.ServerData;
 import Server.Utils.Tuple;
 import Server.View.Logger;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.net.ServerSocket;
-import java.util.Properties;
 import static Server.Controller.Config.*;
 
 public class ServerInit
