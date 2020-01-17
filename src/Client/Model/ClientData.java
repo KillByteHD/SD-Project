@@ -204,7 +204,7 @@ public class ClientData implements Data
         {
             // This is just to get the file length
             File file = new File(ClientInit.CLIENT_PATH + "client_music/"+music.getFileName());
-            System.out.println(ClientInit.CLIENT_PATH + "client_music/"+music.getFileName());
+
 
             //Send request to upload with meta data already included
             C2DRequest.Upload request = new C2DRequest.Upload(auth,music.getName(),
