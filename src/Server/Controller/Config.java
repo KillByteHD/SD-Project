@@ -20,7 +20,7 @@ public class Config
 
     public static boolean loadConfig()
     {
-        try (FileInputStream input = new FileInputStream(ServerInit.SERVER_PATH + "Server/config.properties"))
+        try (FileInputStream input = new FileInputStream(ServerInit.SERVER_PATH + "Server/server.properties"))
         {
             Properties properties = new Properties();
             // load config file

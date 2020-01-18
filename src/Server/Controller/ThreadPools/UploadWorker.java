@@ -92,6 +92,11 @@ public class UploadWorker extends Thread
                     {
                         count = dis.read(bytes,0,(MAX_SIZE > length) ? (int) length : MAX_SIZE);
                         Logger.received(upload_s,count + " bytes");
+
+                        //Go slip slip
+                        try { Thread.sleep(100); }
+                        catch (InterruptedException ignored) { }
+
                         //System.out.println("Received: " + count + " bytes");
                         fos.write(bytes,0,count);
                         //fos.flush(); // Flush not necessary because we are in a try-with-resources clause (fos will be closed and flushed)
